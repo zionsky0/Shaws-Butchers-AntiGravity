@@ -1709,3 +1709,25 @@ table { border-collapse: collapse; width: 100%; }
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
 }
+
+/* ---------- Sync Status ---------- */
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  margin-right: 1rem;
+}
+.sync-status--local {
+  color: var(--admin-text-light);
+}
+.sync-status--connected {
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.2);
+  background: rgba(16, 185, 129, 0.05);
+}

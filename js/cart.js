@@ -321,6 +321,14 @@ const Cart = (() => {
               <input type="email" class="form-input" name="email">
             </div>
             <div class="form-group">
+              <label>Address <span class="required">*</span></label>
+              <input type="text" class="form-input" name="address" required placeholder="E.g. 39 Church Street">
+            </div>
+            <div class="form-group">
+              <label>Postcode <span class="required">*</span></label>
+              <input type="text" class="form-input" name="postcode" required placeholder="E.g. WA7 1LX">
+            </div>
+            <div class="form-group">
               <label>Collection Date <span class="required">*</span></label>
               <input type="date" class="form-input" name="date" required>
             </div>
@@ -381,6 +389,8 @@ const Cart = (() => {
         name: data.name,
         phone: data.phone,
         email: data.email || '',
+        address: data.address || '',
+        postcode: data.postcode || '',
         collectionDate: data.date,
         notes: data.notes || ''
       },
@@ -398,8 +408,13 @@ const Cart = (() => {
       const existingOrders = JSON.parse(localStorage.getItem('shaws_orders') || '[]');
       existingOrders.push(order);
       localStorage.setItem('shaws_orders', JSON.stringify(existingOrders));
+
+      // Sync to Firebase if active
+      if (window.FirebaseSync && window.FirebaseSync.active) {
+        window.FirebaseSync.addOrder(order);
+      }
     } catch (e) {
-      console.warn('Could not save order to localStorage', e);
+      console.warn('Could not save order', e);
     }
 
     // Show success
