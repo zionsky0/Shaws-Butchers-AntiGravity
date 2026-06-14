@@ -171,12 +171,16 @@
 
   // ==================== AUTH ====================
   const checkAuth = () => {
-    return sessionStorage.getItem(KEYS.SESSION) === 'true';
+    return sessionStorage.getItem(KEYS.SESSION) === 'true' || localStorage.getItem(KEYS.SESSION) === 'true';
   };
 
-  const login = (password) => {
+  const login = (password, rememberMe) => {
     if (password === getPassword()) {
-      sessionStorage.setItem(KEYS.SESSION, 'true');
+      if (rememberMe) {
+        localStorage.setItem(KEYS.SESSION, 'true');
+      } else {
+        sessionStorage.setItem(KEYS.SESSION, 'true');
+      }
       return true;
     }
     return false;
@@ -184,6 +188,7 @@
 
   const logout = () => {
     sessionStorage.removeItem(KEYS.SESSION);
+    localStorage.removeItem(KEYS.SESSION);
     showLogin();
   };
 
@@ -831,7 +836,8 @@
     $('#login-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const pass = $('#login-pass').value;
-      if (login(pass)) {
+      const remember = $('#login-remember')?.checked;
+      if (login(pass, remember)) {
         showApp();
       } else {
         $('#login-error').hidden = false;
