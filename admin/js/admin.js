@@ -669,16 +669,11 @@
       const orders = getOrders();
       const idx = orders.findIndex(o => o.id === orderId);
       if (idx !== -1) {
-        if (window.FirebaseSync && window.FirebaseSync.active) {
-          window.FirebaseSync.updateOrderStatus(orderId, newStatus);
-          showToast(`Updating status to "${newStatus}"...`);
-        } else {
-          orders[idx].status = newStatus;
-          saveOrders(orders);
-          showToast(`Order #${orderId} updated to "${newStatus}"`);
-          renderOrders();
-          renderDashboard();
-        }
+        orders[idx].status = newStatus;
+        saveOrders(orders);
+        showToast(`Order #${orderId} updated to "${newStatus}"`);
+        renderOrders();
+        renderDashboard();
         closeOrderModal();
       }
     });
@@ -686,17 +681,12 @@
     // Delete
     footer.querySelector('#delete-order-btn').addEventListener('click', () => {
       if (!confirm('Are you sure you want to delete this order?')) return;
-      if (window.FirebaseSync && window.FirebaseSync.active) {
-        window.FirebaseSync.deleteOrder(orderId);
-        showToast(`Deleting Order #${orderId}...`);
-      } else {
-        const orders = getOrders();
-        const updated = orders.filter(o => o.id !== orderId);
-        saveOrders(updated);
-        showToast(`Order #${orderId} deleted`);
-        renderOrders();
-        renderDashboard();
-      }
+      const orders = getOrders();
+      const updated = orders.filter(o => o.id !== orderId);
+      saveOrders(updated);
+      showToast(`Order #${orderId} deleted`);
+      renderOrders();
+      renderDashboard();
       closeOrderModal();
     });
 
@@ -837,49 +827,6 @@
   const init = () => {
     // Dark mode — apply immediately before anything renders
     initDarkMode();
-
-    // Firebase Sync status badge
-    const badgeEl = $('#sync-status-badge');
-    if (window.FirebaseSync && window.FirebaseSync.active) {
-      if (badgeEl) {
-        badgeEl.textContent = '🟢 Live Sync Active';
-        badgeEl.className = 'sync-status sync-status--connected';
-      }
-      
-      // Start realtime database listener
-      let firstLoad = true;
-      let initialOrdersCount = getOrders().length;
-      
-      window.FirebaseSync.listenToOrders((newOrders) => {
-        // Play notification chime/toast if a new order comes in
-        if (!firstLoad && newOrders.length > initialOrdersCount) {
-          try {
-            showToast("🔔 New Order Received!");
-            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav");
-            audio.volume = 0.5;
-            audio.play().catch(e => console.log("Sound play prevented:", e));
-          } catch (err) {
-            console.warn("Could not play sound:", err);
-          }
-        }
-        
-        firstLoad = false;
-        initialOrdersCount = newOrders.length;
-
-        // Save to localStorage
-        localStorage.setItem(KEYS.ORDERS, JSON.stringify(newOrders));
-
-        // Re-render dashboard/orders UI
-        updateOrdersBadge();
-        if (currentPage === 'orders') renderOrders();
-        if (currentPage === 'dashboard') renderDashboard();
-      });
-    } else {
-      if (badgeEl) {
-        badgeEl.textContent = '⚪ Local-only Mode';
-        badgeEl.className = 'sync-status sync-status--local';
-      }
-    }
 
     // Auth
     if (checkAuth()) {
@@ -1035,52 +982,7 @@
       e.target.value = '';
     });
 
-    // Populate Firebase config inputs
-    const savedConfig = localStorage.getItem('shaws_firebase_config');
-    if (savedConfig) {
-      try {
-        const config = JSON.parse(savedConfig);
-        $('#fb-apiKey').value = config.apiKey || '';
-        $('#fb-projectId').value = config.projectId || '';
-        $('#fb-appId').value = config.appId || '';
-        if (config.authDomain) $('#fb-authDomain').value = config.authDomain || '';
-      } catch (e) {}
-    } else if (window.DEFAULT_FIREBASE_CONFIG) {
-      $('#fb-apiKey').value = window.DEFAULT_FIREBASE_CONFIG.apiKey || '';
-      $('#fb-projectId').value = window.DEFAULT_FIREBASE_CONFIG.projectId || '';
-      $('#fb-appId').value = window.DEFAULT_FIREBASE_CONFIG.appId || '';
-      if (window.DEFAULT_FIREBASE_CONFIG.authDomain) $('#fb-authDomain').value = window.DEFAULT_FIREBASE_CONFIG.authDomain || '';
-    }
 
-    // Save Firebase Config Submit
-    $('#firebase-config-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const config = {
-        apiKey: formData.get('apiKey').trim(),
-        projectId: formData.get('projectId').trim(),
-        appId: formData.get('appId').trim(),
-        authDomain: formData.get('authDomain').trim()
-      };
-
-      if (!config.apiKey || !config.projectId || !config.appId) {
-        alert('Please fill in all required fields (API Key, Project ID, App ID).');
-        return;
-      }
-
-      localStorage.setItem('shaws_firebase_config', JSON.stringify(config));
-      alert('Firebase configuration saved successfully! Reloading to connect...');
-      window.location.reload();
-    });
-
-    // Clear Firebase Config Clear
-    $('#firebase-clear-btn').addEventListener('click', () => {
-      if (confirm('Disconnect from Firebase Live Sync and return to local-only mode?')) {
-        localStorage.removeItem('shaws_firebase_config');
-        alert('Firebase configuration cleared! Reloading...');
-        window.location.reload();
-      }
-    });
 
     // Poll for new orders every 30 seconds
     setInterval(() => {

@@ -379,7 +379,7 @@ const Cart = (() => {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
 
-    // Save order to localStorage for admin panel
+    // Save order locally for reference in their own admin panel
     const orderId = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
     const order = {
       id: orderId,
@@ -408,50 +408,72 @@ const Cart = (() => {
       const existingOrders = JSON.parse(localStorage.getItem('shaws_orders') || '[]');
       existingOrders.push(order);
       localStorage.setItem('shaws_orders', JSON.stringify(existingOrders));
-
-      // Sync to Firebase if active
-      if (window.FirebaseSync && window.FirebaseSync.active) {
-        window.FirebaseSync.addOrder(order);
-      }
-    } catch (e) {
-      console.warn('Could not save order', e);
+    } catch (err) {
+      console.warn('Could not save order locally', err);
     }
 
-    // Show success
+    // Build the formatted WhatsApp order text
+    let message = `*NEW ORDER - SHAW'S BUTCHERS*\n\n`;
+    message += `*Customer Details:*\n`;
+    message += `👤 *Name:* ${data.name}\n`;
+    message += `📞 *Phone:* ${data.phone}\n`;
+    if (data.email) message += `✉️ *Email:* ${data.email}\n`;
+    message += `📍 *Address:* ${data.address}\n`;
+    message += `📮 *Postcode:* ${data.postcode}\n`;
+    message += `📅 *Collection Date:* ${new Date(data.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}\n`;
+    if (data.notes) message += `📝 *Notes:* ${data.notes}\n`;
+    
+    message += `\n*Order Items:*\n`;
+    items.forEach(item => {
+      message += `• ${item.qty}x *${item.name}* (${item.price > 0 ? `£${(item.price * item.qty).toFixed(2)}` : 'Contact'})\n`;
+    });
+    
+    message += `\n💵 *Estimated Total:* £${getTotal().toFixed(2)}\n\n`;
+    message += `_Please confirm my order and let me know when it is ready for collection._`;
+
+    // Encode for the URL
+    const encodedText = encodeURIComponent(message);
+    
+    // WhatsApp configuration (Use international format: 44XXXXXXXXXX)
+    // 441928561869 corresponds to their landline 01928 561869.
+    // If using a mobile number instead, swap it here (e.g. 447911123456)
+    const whatsappPhone = '441928561869'; 
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedText}`;
+
+    // Show success screen and trigger WhatsApp
     const basketContainer = document.querySelector('.basket-page-content');
     basketContainer.innerHTML = `
       <div class="basket-success">
-        <div class="basket-success-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div class="basket-success-icon" style="color: #25D366;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="64" height="64">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
         </div>
-        <h2>Order Submitted!</h2>
-        <p>Thank you, <strong>${data.name}</strong>! Your order has been received.</p>
-        <div class="basket-success-details">
-          <h4>Order Details</h4>
-          <div class="basket-success-items">
-            ${items.map(item => `
-              <div class="basket-success-item">
-                <span>${item.qty}x ${item.name}</span>
-                <span>£${(item.price * item.qty).toFixed(2)}</span>
-              </div>
-            `).join('')}
-            <div class="basket-success-item basket-success-total">
-              <span>Estimated Total</span>
-              <strong>£${getTotal().toFixed(2)}</strong>
-            </div>
-          </div>
+        <h2 style="color: #128C7E;">Redirecting to WhatsApp...</h2>
+        <p>Thank you, <strong>${data.name}</strong>! Your order message has been prepared.</p>
+        
+        <div class="basket-success-details" style="margin: 1.5rem 0; text-align: left;">
+          <p><strong>Estimated Total:</strong> £${getTotal().toFixed(2)}</p>
           <p><strong>Collection Date:</strong> ${new Date(data.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          ${data.notes ? `<p><strong>Notes:</strong> ${data.notes}</p>` : ''}
         </div>
-        <p class="basket-success-notice">We'll confirm your order shortly. Final prices may vary slightly depending on weight. If you have any questions, call us on <a href="tel:01928561869">01928 561869</a>.</p>
-        <div class="basket-success-actions">
+        
+        <p class="basket-success-notice" style="background: #E8F5E9; border-left: 4px solid #25D366; padding: 1rem; border-radius: 4px;">
+          ⚠️ <strong>Action Required:</strong> Please ensure you click <strong>"Send"</strong> in WhatsApp once it opens to submit the order message to us.<br><br>
+          If WhatsApp did not open automatically, <a href="${whatsappUrl}" target="_blank" style="font-weight: 700; color: #128C7E; text-decoration: underline;">click here to send manually</a>.
+        </p>
+        
+        <div class="basket-success-actions" style="margin-top: 2rem;">
           <a href="index.html" class="btn btn--primary">Back to Home</a>
           <a href="beef.html" class="btn btn--outline">Continue Shopping</a>
         </div>
       </div>
     `;
 
+    // Clear cart memory
     clear();
+
+    // Open WhatsApp in a new tab/app window
+    window.open(whatsappUrl, '_blank');
   };
 
   // ---------- Init ----------
