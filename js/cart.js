@@ -257,6 +257,14 @@ const Cart = (() => {
       return;
     }
 
+    // Load saved customer details to pre-fill the form
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem('shaws_customer_details') || '{}');
+    } catch (err) {
+      console.warn("Failed to load saved customer details", err);
+    }
+
     basketContainer.innerHTML = `
       <div class="basket-layout">
         <div class="basket-items">
@@ -310,23 +318,23 @@ const Cart = (() => {
           <form class="basket-checkout-form" id="checkout-form">
             <div class="form-group">
               <label>Full Name <span class="required">*</span></label>
-              <input type="text" class="form-input" name="name" required>
+              <input type="text" class="form-input" name="name" required value="${saved.name || ''}">
             </div>
             <div class="form-group">
               <label>Phone Number <span class="required">*</span></label>
-              <input type="tel" class="form-input" name="phone" required>
+              <input type="tel" class="form-input" name="phone" required value="${saved.phone || ''}">
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" class="form-input" name="email">
+              <input type="email" class="form-input" name="email" value="${saved.email || ''}">
             </div>
             <div class="form-group">
               <label>Address <span class="required">*</span></label>
-              <input type="text" class="form-input" name="address" required placeholder="E.g. 39 Church Street">
+              <input type="text" class="form-input" name="address" required placeholder="E.g. 39 Church Street" value="${saved.address || ''}">
             </div>
             <div class="form-group">
               <label>Postcode <span class="required">*</span></label>
-              <input type="text" class="form-input" name="postcode" required placeholder="E.g. WA7 1LX">
+              <input type="text" class="form-input" name="postcode" required placeholder="E.g. WA7 1LX" value="${saved.postcode || ''}">
             </div>
             <div class="form-group">
               <label>Collection Date <span class="required">*</span></label>
@@ -367,9 +375,27 @@ const Cart = (() => {
       if (confirm('Remove all items from your basket?')) clear();
     });
 
-    // Checkout form
+    // Checkout form listeners
     const form = basketContainer.querySelector('#checkout-form');
     form?.addEventListener('submit', handleCheckout);
+
+    // Save inputs dynamically as the customer types
+    form?.addEventListener('input', () => {
+      try {
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        const details = {
+          name: data.name || '',
+          phone: data.phone || '',
+          email: data.email || '',
+          address: data.address || '',
+          postcode: data.postcode || ''
+        };
+        localStorage.setItem('shaws_customer_details', JSON.stringify(details));
+      } catch (err) {
+        console.warn("Failed to auto-save customer details", err);
+      }
+    });
   };
 
   // ---------- Checkout ----------
@@ -379,8 +405,23 @@ const Cart = (() => {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
 
-    // Save order locally for reference in their own admin panel
-    const orderId = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+    // Explicitly save details to local storage
+    try {
+      const details = {
+        name: data.name || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        address: data.address || '',
+        postcode: data.postcode || ''
+      };
+      localStorage.setItem('shaws_customer_details', JSON.stringify(details));
+    } catch (err) {
+      console.warn("Failed to save customer details on checkout", err);
+    }
+
+    // Generate a user-friendly order ID in the format "beefXXXX" where XXXX is a random 4-digit number
+    const orderNum = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `beef${orderNum}`;
     const order = {
       id: orderId,
       date: new Date().toISOString(),
@@ -404,76 +445,133 @@ const Cart = (() => {
       total: getTotal()
     };
 
-    try {
-      const existingOrders = JSON.parse(localStorage.getItem('shaws_orders') || '[]');
-      existingOrders.push(order);
-      localStorage.setItem('shaws_orders', JSON.stringify(existingOrders));
-    } catch (err) {
-      console.warn('Could not save order locally', err);
-    }
-
-    // Build the formatted WhatsApp order text
-    let message = `*NEW ORDER - SHAW'S BUTCHERS*\n\n`;
-    message += `*Customer Details:*\n`;
-    message += `👤 *Name:* ${data.name}\n`;
-    message += `📞 *Phone:* ${data.phone}\n`;
-    if (data.email) message += `✉️ *Email:* ${data.email}\n`;
-    message += `📍 *Address:* ${data.address}\n`;
-    message += `📮 *Postcode:* ${data.postcode}\n`;
-    message += `📅 *Collection Date:* ${new Date(data.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}\n`;
-    if (data.notes) message += `📝 *Notes:* ${data.notes}\n`;
-    
-    message += `\n*Order Items:*\n`;
-    items.forEach(item => {
-      message += `• ${item.qty}x *${item.name}* (${item.price > 0 ? `£${(item.price * item.qty).toFixed(2)}` : 'Contact'})\n`;
-    });
-    
-    message += `\n💵 *Estimated Total:* £${getTotal().toFixed(2)}\n\n`;
-    message += `_Please confirm my order and let me know when it is ready for collection._`;
-
-    // Encode for the URL
-    const encodedText = encodeURIComponent(message);
-    
-    // WhatsApp configuration (Use international format: 44XXXXXXXXXX)
-    // 441928561869 corresponds to their landline 01928 561869.
-    // If using a mobile number instead, swap it here (e.g. 447911123456)
-    const whatsappPhone = '441928561869'; 
-    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedText}`;
-
-    // Show success screen and trigger WhatsApp
+    // Show submitting spinner / overlay
     const basketContainer = document.querySelector('.basket-page-content');
     basketContainer.innerHTML = `
-      <div class="basket-success">
-        <div class="basket-success-icon" style="color: #25D366;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="64" height="64">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-          </svg>
-        </div>
-        <h2 style="color: #128C7E;">Redirecting to WhatsApp...</h2>
-        <p>Thank you, <strong>${data.name}</strong>! Your order message has been prepared.</p>
-        
-        <div class="basket-success-details" style="margin: 1.5rem 0; text-align: left;">
-          <p><strong>Estimated Total:</strong> £${getTotal().toFixed(2)}</p>
-          <p><strong>Collection Date:</strong> ${new Date(data.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        </div>
-        
-        <p class="basket-success-notice" style="background: #E8F5E9; border-left: 4px solid #25D366; padding: 1rem; border-radius: 4px;">
-          ⚠️ <strong>Action Required:</strong> Please ensure you click <strong>"Send"</strong> in WhatsApp once it opens to submit the order message to us.<br><br>
-          If WhatsApp did not open automatically, <a href="${whatsappUrl}" target="_blank" style="font-weight: 700; color: #128C7E; text-decoration: underline;">click here to send manually</a>.
-        </p>
-        
-        <div class="basket-success-actions" style="margin-top: 2rem;">
-          <a href="index.html" class="btn btn--primary">Back to Home</a>
-          <a href="beef.html" class="btn btn--outline">Continue Shopping</a>
-        </div>
+      <div class="basket-loading" style="text-align: center; padding: 4rem 0;">
+        <div class="spinner" style="border: 4px solid #e5e7eb; border-top: 4px solid #8B1A1A; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"></div>
+        <h3 style="color: #111827; margin-bottom: 0.5rem; font-size: 1.25rem;">Submitting Your Order...</h3>
+        <p style="color: #4b5563; font-size: 0.95rem;">Please wait while we transmit your details to the shop.</p>
       </div>
+      <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      </style>
     `;
 
-    // Clear cart memory
-    clear();
+    const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
 
-    // Open WhatsApp in a new tab/app window
-    window.open(whatsappUrl, '_blank');
+    const formatCollectionDate = (dateStr) => {
+      try {
+        if (!dateStr) return 'N/A';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      } catch (err) {
+        return dateStr || 'N/A';
+      }
+    };
+
+    const showSuccess = () => {
+      // Clear cart memory
+      clear();
+
+      basketContainer.innerHTML = `
+        <div class="basket-success">
+          <div class="basket-success-icon" style="color: #10B981; margin-bottom: 1.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="64" height="64">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 style="color: #065f46; margin-bottom: 0.5rem; font-size: 1.5rem;">Order Submitted!</h2>
+          <p>Thank you, <strong>${data.name}</strong>! Your order has been successfully placed.</p>
+          
+          <div class="basket-success-details" style="margin: 1.5rem 0; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1.25rem;">
+            <h4 style="margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; color: #111827; font-weight: 600;">Order Summary</h4>
+            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Order ID:</strong> #${order.id}</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Collection Date:</strong> ${formatCollectionDate(data.date)}</p>
+            <p style="margin-bottom: 0; font-size: 0.92rem;"><strong>Estimated Total:</strong> £${order.total.toFixed(2)}</p>
+          </div>
+          
+          <p class="basket-success-notice" style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem; border-radius: 4px; color: #166534; font-size: 0.92rem; text-align: left;">
+            🔔 Your order has been logged. We'll verify the cuts and prepare them for your selected collection day. If you have any immediate changes, call us on <a href="tel:01928561869" style="font-weight: 700; color: #166534; text-decoration: underline;">01928 561869</a>.
+          </p>
+          
+          <div class="basket-success-actions" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+            <a href="index.html" class="btn btn--primary">Back to Home</a>
+            <a href="beef.html" class="btn btn--outline">Continue Shopping</a>
+          </div>
+        </div>
+      `;
+    };
+
+    const saveLocal = () => {
+      try {
+        const existingOrders = JSON.parse(localStorage.getItem('shaws_orders') || '[]');
+        existingOrders.push(order);
+        localStorage.setItem('shaws_orders', JSON.stringify(existingOrders));
+      } catch (err) {
+        console.warn('Could not save order locally', err);
+      }
+    };
+
+    const fallbackToLocal = () => {
+      saveLocal();
+      showSuccess();
+      const successNotice = document.querySelector('.basket-success-notice');
+      if (successNotice) {
+        successNotice.style.background = '#fffbeb';
+        successNotice.style.borderColor = '#d97706';
+        successNotice.style.color = '#92400e';
+        successNotice.innerHTML = `
+          ⚠️ <strong>Connection Notice:</strong> Your order was saved locally on this device, but we encountered an issue transmitting it to our cloud spreadsheet database. Please contact us on <a href="tel:01928561869" style="font-weight:700; color:#92400e; text-decoration:underline;">01928 561869</a> to confirm we received it.
+        `;
+      }
+    };
+
+    const isValidUrl = (str) => {
+      try {
+        const parsed = new URL(str);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    };
+
+    if (sheetUrl && isValidUrl(sheetUrl)) {
+      // Send to Google Sheets Apps Script endpoint
+      try {
+        fetch(sheetUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: "create",
+            order: order
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP request failed");
+          return res.json();
+        })
+        .then(resData => {
+          if (resData.status === "success") {
+            saveLocal();
+            showSuccess();
+          } else {
+            throw new Error(resData.message || "Failed to write to sheet");
+          }
+        })
+        .catch(err => {
+          console.error("Google Sheet Sync Error (Promise):", err);
+          fallbackToLocal();
+        });
+      } catch (err) {
+        console.error("Google Sheet Sync Error (Synchronous):", err);
+        fallbackToLocal();
+      }
+    } else {
+      // Demo fallback mode (no URL configured or invalid URL)
+      saveLocal();
+      setTimeout(showSuccess, 800);
+    }
   };
 
   // ---------- Init ----------

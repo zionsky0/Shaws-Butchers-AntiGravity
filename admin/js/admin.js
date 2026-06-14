@@ -12,6 +12,8 @@
 
   const DEFAULT_PASSWORD = 'shaws2024';
 
+  let fetchOrdersFromSheet = null;
+
   // ==================== DEFAULT PRODUCTS ====================
   // These match the hardcoded products on the website
   const DEFAULT_PRODUCTS = [
@@ -666,27 +668,80 @@
     // Save status
     footer.querySelector('#save-order-status').addEventListener('click', () => {
       const newStatus = footer.querySelector('#order-status-change').value;
-      const orders = getOrders();
-      const idx = orders.findIndex(o => o.id === orderId);
-      if (idx !== -1) {
-        orders[idx].status = newStatus;
-        saveOrders(orders);
-        showToast(`Order #${orderId} updated to "${newStatus}"`);
-        renderOrders();
-        renderDashboard();
-        closeOrderModal();
+      const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
+      
+      if (sheetUrl) {
+        showToast("Saving status to cloud...");
+        fetch(sheetUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: "updateStatus",
+            id: orderId,
+            status: newStatus
+          })
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.status === "success") {
+            showToast(`Order #${orderId} status updated to "${newStatus}"`);
+            if (fetchOrdersFromSheet) fetchOrdersFromSheet();
+          } else {
+            throw new Error(resData.message || "Failed to update status");
+          }
+        })
+        .catch(err => {
+          console.error("Cloud status update error:", err);
+          showToast("⚠️ Failed to update status in Cloud Sheet");
+        });
+      } else {
+        const orders = getOrders();
+        const idx = orders.findIndex(o => o.id === orderId);
+        if (idx !== -1) {
+          orders[idx].status = newStatus;
+          saveOrders(orders);
+          showToast(`Order #${orderId} updated to "${newStatus}" (Local)`);
+          renderOrders();
+          renderDashboard();
+        }
       }
+      closeOrderModal();
     });
 
     // Delete
     footer.querySelector('#delete-order-btn').addEventListener('click', () => {
       if (!confirm('Are you sure you want to delete this order?')) return;
-      const orders = getOrders();
-      const updated = orders.filter(o => o.id !== orderId);
-      saveOrders(updated);
-      showToast(`Order #${orderId} deleted`);
-      renderOrders();
-      renderDashboard();
+      const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
+      
+      if (sheetUrl) {
+        showToast("Deleting from cloud...");
+        fetch(sheetUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: "delete",
+            id: orderId
+          })
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.status === "success") {
+            showToast(`Order #${orderId} deleted`);
+            if (fetchOrdersFromSheet) fetchOrdersFromSheet();
+          } else {
+            throw new Error(resData.message || "Failed to delete");
+          }
+        })
+        .catch(err => {
+          console.error("Cloud delete error:", err);
+          showToast("⚠️ Failed to delete order in Cloud Sheet");
+        });
+      } else {
+        const orders = getOrders();
+        const updated = orders.filter(o => o.id !== orderId);
+        saveOrders(updated);
+        showToast(`Order #${orderId} deleted (Local)`);
+        renderOrders();
+        renderDashboard();
+      }
       closeOrderModal();
     });
 
@@ -827,6 +882,69 @@
   const init = () => {
     // Dark mode — apply immediately before anything renders
     initDarkMode();
+
+    // Google Sheets Sync status badge
+    const badgeEl = $('#sync-status-badge');
+    const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
+    
+    if (sheetUrl) {
+      if (badgeEl) {
+        badgeEl.textContent = '🟢 Live Sync Active';
+        badgeEl.className = 'sync-status sync-status--connected';
+      }
+      
+      // Define fetchOrdersFromSheet
+      fetchOrdersFromSheet = () => {
+        if (!checkAuth()) return; // only fetch if logged in
+        fetch(sheetUrl)
+        .then(res => {
+          if (!res.ok) throw new Error("Fetch failed");
+          return res.json();
+        })
+        .then(newOrders => {
+          if (Array.isArray(newOrders)) {
+            // Check for new orders to play chime/toast
+            const oldOrdersStr = localStorage.getItem(KEYS.ORDERS);
+            const oldOrders = oldOrdersStr ? JSON.parse(oldOrdersStr) : [];
+            
+            // If new orders are found and we aren't loading for the first time
+            if (oldOrders.length > 0 && newOrders.length > oldOrders.length) {
+              try {
+                showToast("🔔 New Order Received!");
+                const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav");
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log("Sound play blocked:", e));
+              } catch (err) {}
+            }
+            
+            localStorage.setItem(KEYS.ORDERS, JSON.stringify(newOrders));
+            
+            // Re-render UI
+            updateOrdersBadge();
+            if (currentPage === 'orders') renderOrders();
+            if (currentPage === 'dashboard') renderDashboard();
+          }
+        })
+        .catch(err => {
+          console.error("Error syncing with Google Sheet:", err);
+        });
+      };
+      
+      // Sync immediately on load
+      setTimeout(() => {
+        fetchOrdersFromSheet();
+      }, 500);
+      
+      // Poll every 15 seconds for updates
+      setInterval(() => {
+        fetchOrdersFromSheet();
+      }, 15000);
+    } else {
+      if (badgeEl) {
+        badgeEl.textContent = '⚪ Local Mode';
+        badgeEl.className = 'sync-status sync-status--local';
+      }
+    }
 
     // Auth
     if (checkAuth()) {
@@ -981,6 +1099,36 @@
       if (e.target.files[0]) importData(e.target.files[0]);
       e.target.value = '';
     });
+
+    // Google Sheets Config Settings
+    const gsUrlInput = $('#gs-url');
+    if (gsUrlInput) {
+      gsUrlInput.value = localStorage.getItem('shaws_google_sheet_url') || '';
+    }
+
+    const gsheetForm = $('#gsheet-config-form');
+    if (gsheetForm) {
+      gsheetForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = $('#gs-url').value.trim();
+        if (url) {
+          localStorage.setItem('shaws_google_sheet_url', url);
+          alert('Google Sheets Sync URL saved! The page will now reload.');
+          window.location.reload();
+        }
+      });
+    }
+
+    const gsheetClearBtn = $('#gsheet-clear-btn');
+    if (gsheetClearBtn) {
+      gsheetClearBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to disconnect Google Sheets sync? You will return to local-only mode.')) {
+          localStorage.removeItem('shaws_google_sheet_url');
+          alert('Google Sheets Sync disabled! The page will now reload.');
+          window.location.reload();
+        }
+      });
+    }
 
 
 
