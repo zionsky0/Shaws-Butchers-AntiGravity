@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Shaw's Family Butchers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ===== Login Screen ===== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+          <circle cx="16" cy="12" r="3"/>
+        </svg>
+        <h1>Shaw's <span>Butchers</span></h1>
+        <p>Admin Panel</p>
+      </div>
+      <form id="login-form">
+        <div class="login-field">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" placeholder="Enter admin password" autofocus>
+        </div>
+        <button type="submit" class="btn-login">Sign In</button>
+        <p id="login-error" class="login-error" hidden>Incorrect password. Try again.</p>
+      </form>
+      <p class="login-hint">Default password: <strong>shaws2024</strong></p>
+    </div>
+  </div>
+
+  <!-- ===== Main App ===== -->
+  <div id="app" class="app" hidden>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+          <circle cx="16" cy="12" r="3"/>
+        </svg>
+        <div>
+          <strong>Shaw's Butchers</strong>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="sidebar-link active" data-page="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="#" class="sidebar-link" data-page="orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Orders
+          <span class="sidebar-badge" id="orders-badge" hidden>0</span>
+        </a>
+        <a href="#" class="sidebar-link" data-page="products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Products
+        </a>
+        <a href="#" class="sidebar-link" data-page="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-link dark-mode-toggle" id="dark-mode-toggle" type="button">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span class="dark-mode-label">Dark Mode</span>
+        </button>
+        <a href="../index.html" class="sidebar-link" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Live Site
+        </a>
+        <a href="#" class="sidebar-link" id="logout-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Mobile header -->
+    <header class="topbar" id="topbar">
+      <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <button class="topbar-dark-toggle" id="dark-mode-toggle-mobile" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <span class="topbar-user">Admin</span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main" id="main">
+
+      <!-- ===== Dashboard Page ===== -->
+      <section class="page" id="page-dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Welcome back! Here's what's happening at Shaw's.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--orders">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <span class="stat-value" id="stat-total-orders">0</span>
+              <span class="stat-label">Total Orders</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--pending">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <span class="stat-value" id="stat-pending-orders">0</span>
+              <span class="stat-label">Pending Orders</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--revenue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <span class="stat-value" id="stat-revenue">£0</span>
+              <span class="stat-label">Est. Revenue</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--products">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div>
+              <span class="stat-value" id="stat-total-products">0</span>
+              <span class="stat-label">Products</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Orders</h3>
+              <a href="#" class="card-link" data-goto="orders">View All →</a>
+            </div>
+            <div class="card-body" id="dashboard-recent-orders">
+              <p class="empty-text">No orders yet.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Quick Actions</h3>
+            </div>
+            <div class="card-body quick-actions">
+              <button class="quick-action-btn" data-action="add-product">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add New Product
+              </button>
+              <button class="quick-action-btn" data-action="view-orders">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                View Orders
+              </button>
+              <a href="../index.html" target="_blank" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View Live Site
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Orders Page ===== -->
+      <section class="page" id="page-orders" hidden>
+        <div class="page-header">
+          <h1>Orders</h1>
+          <p>Manage customer orders</p>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="filter-group">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="pending">Pending</button>
+              <button class="filter-btn" data-filter="confirmed">Confirmed</button>
+              <button class="filter-btn" data-filter="ready">Ready</button>
+              <button class="filter-btn" data-filter="collected">Collected</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <input type="text" class="search-input" id="orders-search" placeholder="Search orders...">
+          </div>
+        </div>
+
+        <div id="orders-list" class="orders-list">
+          <p class="empty-text">No orders yet.</p>
+        </div>
+      </section>
+
+      <!-- ===== Products Page ===== -->
+      <section class="page" id="page-products" hidden>
+        <div class="page-header">
+          <h1>Products</h1>
+          <div class="page-header-actions">
+            <button class="btn btn-primary" id="add-product-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Product
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="filter-group">
+              <button class="filter-btn active" data-cat="all">All</button>
+              <button class="filter-btn" data-cat="beef">Beef</button>
+              <button class="filter-btn" data-cat="lamb">Lamb</button>
+              <button class="filter-btn" data-cat="pork">Pork</button>
+              <button class="filter-btn" data-cat="chicken">Chicken</button>
+              <button class="filter-btn" data-cat="bacon">Bacon & Gammon</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <input type="text" class="search-input" id="products-search" placeholder="Search products...">
+          </div>
+        </div>
+
+        <div id="products-list" class="products-table">
+          <p class="empty-text">Loading products...</p>
+        </div>
+      </section>
+
+      <!-- ===== Settings Page ===== -->
+      <section class="page" id="page-settings" hidden>
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Manage your admin panel settings</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-header"><h3>Change Password</h3></div>
+            <div class="card-body">
+              <form id="change-password-form">
+                <div class="form-row">
+                  <label>Current Password</label>
+                  <input type="password" class="form-input" name="current" required>
+                </div>
+                <div class="form-row">
+                  <label>New Password</label>
+                  <input type="password" class="form-input" name="newPass" required minlength="4">
+                </div>
+                <div class="form-row">
+                  <label>Confirm New Password</label>
+                  <input type="password" class="form-input" name="confirm" required minlength="4">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Password</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Data Management</h3></div>
+            <div class="card-body">
+              <p class="setting-desc">Export your data or reset everything.</p>
+              <div class="settings-actions">
+                <button class="btn btn-secondary" id="export-data-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export All Data
+                </button>
+                <button class="btn btn-danger" id="reset-data-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Reset All Data
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Import Products</h3></div>
+            <div class="card-body">
+              <p class="setting-desc">Import products from a JSON file.</p>
+              <input type="file" id="import-file" accept=".json" style="display:none">
+              <button class="btn btn-secondary" id="import-data-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import JSON File
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== Product Modal ===== -->
+  <div class="modal-overlay" id="product-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Product</h2>
+        <button class="modal-close" id="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="product-form">
+        <input type="hidden" name="id" id="pf-id">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="pf-name">Product Name <span class="req">*</span></label>
+              <input type="text" class="form-input" id="pf-name" name="name" required placeholder="e.g. Sirloin Steak">
+            </div>
+            <div class="form-row">
+              <label for="pf-category">Category <span class="req">*</span></label>
+              <select class="form-input" id="pf-category" name="category" required>
+                <option value="">Select category...</option>
+                <option value="beef">Beef</option>
+                <option value="lamb">Lamb</option>
+                <option value="pork">Pork</option>
+                <option value="chicken">Chicken</option>
+                <option value="sausage">Sausages</option>
+                <option value="bacon">Bacon & Gammon</option>
+                <option value="eggs">Eggs</option>
+                <option value="other">Other</option>
+                <option value="specials">Special Offer Bundles</option>
+                <option value="seasonal">Seasonal</option>
+                <option value="christmas">Christmas</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="pf-price">Price (£) <span class="req">*</span></label>
+              <input type="number" class="form-input" id="pf-price" name="price" required step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="form-row">
+              <label for="pf-unit">Unit <span class="req">*</span></label>
+              <select class="form-input" id="pf-unit" name="unit" required>
+                <option value="/kg">/kg</option>
+                <option value="/each">/each</option>
+                <option value="/pack">/pack</option>
+                <option value="/lb">/lb</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="pf-desc">Description</label>
+            <textarea class="form-input" id="pf-desc" name="description" rows="3" placeholder="Describe the product..."></textarea>
+          </div>
+          <div class="form-row">
+            <label for="pf-badge">Badge (optional)</label>
+            <input type="text" class="form-input" id="pf-badge" name="badge" placeholder="e.g. Popular, Premium, Handmade">
+          </div>
+          <div class="form-row">
+            <label>Product Photo</label>
+            <div class="photo-upload" id="photo-upload">
+              <div class="photo-preview" id="photo-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Click or drag to upload</span>
+              </div>
+              <input type="file" id="pf-photo" name="photo" accept="image/*" style="display:none">
+              <button type="button" class="btn btn-secondary btn-sm" id="remove-photo-btn" hidden>Remove Photo</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="pf-available" name="available" checked>
+              <span>Available (visible on the website)</span>
+            </label>
+          </div>
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="pf-soldout" name="soldOut">
+              <span>Sold Out (show as sold out instead of hiding)</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-save">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Order Detail Modal ===== -->
+  <div class="modal-overlay" id="order-modal" hidden>
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 id="order-modal-title">Order Details</h2>
+        <button class="modal-close" id="order-modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="order-modal-body">
+      </div>
+      <div class="modal-footer" id="order-modal-footer">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div id="toast" class="toast" hidden>
+    <span id="toast-msg"></span>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

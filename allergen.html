@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Allergen Information | Shaw's Family Butchers</title>
+  <meta name="description" content="Allergen information for products sold at Shaw's Family Butchers. We take food allergies seriously — please ask in store if you have any concerns.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/demo-mode.css">
+</head>
+<body>
+  <div class="mobile-overlay"></div>
+
+  <nav class="navbar scrolled">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="nav-logo">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+          <circle cx="16" cy="12" r="3"/>
+        </svg>
+        <span data-demo="shop-name">Shaw's</span> <span class="logo-accent">Butchers</span>
+      </a>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="nav-link nav-dropdown-toggle">Shop
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="nav-dropdown-menu">
+            <a href="beef.html">Beef</a>
+            <a href="lamb.html">Lamb</a>
+            <a href="pork.html">Pork</a>
+            <a href="chicken.html">Chicken</a>
+            <a href="sausage.html">Sausages</a>
+            <a href="bacon.html">Bacon & Gammon</a>
+            <a href="eggs.html">Eggs</a>
+            <a href="other.html">Other</a>
+          </div>
+        </li>
+        <li class="nav-dropdown">
+          <a href="#" class="nav-link nav-dropdown-toggle active">More
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="nav-dropdown-menu">
+            <a href="specials.html">Special Offer Bundles</a>
+            <a href="seasonal.html">Seasonal</a>
+            <a href="christmas.html">Christmas</a>
+            <a href="allergen.html">Allergen Information</a>
+          </div>
+        </li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+      </ul>
+      <button class="dark-mode-toggle-btn" id="darkToggle" aria-label="Toggle dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="cart-icon-btn" aria-label="View basket">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge" style="display:none;">0</span>
+      </button>
+      <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="hero-bg"></div>
+    <div class="container page-hero-content">
+      <div class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Important
+      </div>
+      <h1 class="page-hero-title">Allergen Information</h1>
+      <p class="page-hero-subtitle">Important information about allergens in our products</p>
+      <div class="breadcrumbs">
+        <a href="index.html">Home</a><span>/</span><span class="current">Allergen Information</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="max-width:800px; margin:0 auto;">
+        <div style="background:var(--bg-warm); border-radius:12px; padding:2rem; margin-bottom:2rem; border-left:4px solid var(--accent);">
+          <h2 style="font-family:'Playfair Display',serif; margin-bottom:0.75rem; font-size:1.5rem;">Allergen Information</h2>
+          <p style="color:var(--text-secondary); line-height:1.7;">Below you can find the full ingredient breakdowns for our products. If you have any concerns about allergens, please do not hesitate to ask a member of our team in store.</p>
+        </div>
+
+        <div style="background:var(--primary); color:#fff; border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:2rem; text-align:center;">
+          <p style="font-weight:600; margin-bottom:0.25rem;">May contain traces of: milk, soya, celery, mustard, sulphur dioxide</p>
+          <p style="opacity:0.9; font-size:0.95rem;">Gluten Free option available — please ask in store</p>
+        </div>
+
+        <h3 style="font-family:'Playfair Display',serif; margin-bottom:1rem; font-size:1.3rem;">Product Ingredient Breakdowns</h3>
+
+        <div style="display:grid; gap:1rem; margin-bottom:2rem;">
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Sausage Seasonings</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Salt, flour (calcium, iron, niacin, thiamine), rusk (wheat), spices, dextrose, preservative E221 (sulphite), sugar, diphosphates E450, triphosphates E451, polyphosphates E452.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Honey Roast Sausage</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Salt, sugar, dextrose, wheat flour, calcium carbonate, iron, niacin, thiamine, stabiliser E451, yeast extract, spice extracts, onion extract, preservative E221 (sodium sulphite), antioxidant E301.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Rusk in Sausage</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Dried cereal, wheat flour, salt, raising agent (sodium bicarbonate), water.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Oriental Salt &amp; Pepper Glaze</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Maltodextrin, salt (16.5%), maize starch, cracked black pepper (6.5%), ginger (2%), fennel, star anise, cinnamon, clove, sugar, chilli flakes (1%), garlic powder, colour (plain caramel, paprika extract).</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Chinese Glaze</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Sugar, maltodextrin, salt, starch, colours (plain caramel, ammonia caramel, paprika extract), spices (star anise, cinnamon, ginger), garlic, acid (citric acid), flavourings.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Garden Mint Glaze</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Sugar, acids (citric acid, malic acid), dried glucose syrup, modified starch, salt, dried mint (3.6%), colour (copper chlorophyllin), natural flavouring.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Burger Seasoning</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Rusk (wheat flour, salt, raising agent), salt, dried onion, dextrose, preservative E221 (sodium sulphite), stabilisers (diphosphates E450, triphosphates E451, polyphosphates E452), mustard powder, spice extracts, herb extracts.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Sausage Rolls</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Puff pastry (wheat flour, vegetable oil (palm), water, salt), filled with pork and sausage seasoning (see sausage seasonings above).</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Dijon Mustard</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Water, mustard seeds, spirit vinegar, salt, citric acid, potassium metabisulphite.</p>
+          </div>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
+            <h4 style="color:var(--primary); margin-bottom:0.5rem;">Clear Honey</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Pure clear honey. A blend of EU and non-EU honeys.</p>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:2px solid var(--primary); border-radius:12px; padding:2rem; text-align:center;">
+          <h3 style="font-family:'Playfair Display',serif; margin-bottom:0.5rem; color:var(--primary);">Got a Question?</h3>
+          <p style="color:var(--text-secondary); margin-bottom:1rem;">If you have any concerns about allergens in our products, please don't hesitate to contact us. We're happy to provide detailed ingredient information for any product.</p>
+          <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="tel:01928561869" class="btn btn--primary">Call Us</a>
+            <a href="contact.html" class="btn btn--outline">Visit Contact Page</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+              <circle cx="16" cy="12" r="3"/>
+            </svg>
+            <span data-demo="shop-name">Shaw's</span> <span class="logo-accent">Butchers</span>
+          </a>
+          <p>Your trusted family butcher in Runcorn. Quality meats, handmade sausages and burgers, made fresh on the premises daily.</p>
+          <div class="footer-social">
+            <a href="https://facebook.com/G.B.shaws.butchers" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <div class="footer-links"><a href="index.html">Home</a><a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="specials.html">Special Offers</a><a href="allergen.html">Allergen Info</a></div>
+        </div>
+        <div>
+          <h4>Our Products</h4>
+          <div class="footer-links"><a href="beef.html">Beef</a><a href="lamb.html">Lamb</a><a href="pork.html">Pork</a><a href="chicken.html">Chicken</a><a href="sausage.html">Sausages</a><a href="bacon.html">Bacon & Gammon</a><a href="eggs.html">Eggs</a></div>
+        </div>
+        <div>
+          <h4>Get In Touch</h4>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <p data-demo="address">39 Church Street<br>Runcorn, WA7 1LX</p>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:01928561869" data-demo="phone">01928 561869</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:info@shawsbutchers.net">info@shawsbutchers.net</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2014 - 2026 <span data-demo="shop-name-full">Shaw's Family Butchers</span>. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/demo-mode.js"></script>
+</body>
+</html>

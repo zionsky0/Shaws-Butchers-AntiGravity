@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaw's Family Butchers | Quality Meats in Runcorn</title>
+  <meta name="description" content="Welcome to Shaw's Family Butchers - Your trusted local butcher in Runcorn. Fresh quality meats, homemade sausages and burgers, made on the premises daily.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/demo-mode.css">
+</head>
+<body>
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="nav-logo">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+          <circle cx="16" cy="12" r="3"/>
+        </svg>
+        <span data-demo="shop-name">Shaw's</span> <span class="logo-accent">Butchers</span>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+        <li class="nav-dropdown">
+          <a href="#" class="nav-link nav-dropdown-toggle">
+            Shop
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="nav-dropdown-menu">
+            <a href="beef.html">Beef</a>
+            <a href="lamb.html">Lamb</a>
+            <a href="pork.html">Pork</a>
+            <a href="chicken.html">Chicken</a>
+            <a href="sausage.html">Sausages</a>
+            <a href="bacon.html">Bacon & Gammon</a>
+            <a href="eggs.html">Eggs</a>
+            <a href="other.html">Other</a>
+          </div>
+        </li>
+        <li class="nav-dropdown">
+          <a href="#" class="nav-link nav-dropdown-toggle">
+            More
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="nav-dropdown-menu">
+            <a href="specials.html">Special Offer Bundles</a>
+            <a href="seasonal.html">Seasonal</a>
+            <a href="christmas.html">Christmas</a>
+            <a href="allergen.html">Allergen Information</a>
+          </div>
+        </li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+      </ul>
+
+      <button class="dark-mode-toggle-btn" id="darkToggle" aria-label="Toggle dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="cart-icon-btn" aria-label="View basket">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge" style="display:none;">0</span>
+      </button>
+
+      <button class="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span data-demo="shop-name-full">Shaw's Family Butchers</span> · Since 2014
+      </div>
+      <h1 class="hero-title">
+        <span data-demo="tagline">Quality Meats,<br><span class="highlight">Crafted With Care</span></span>
+      </h1>
+      <p class="hero-subtitle">
+        Welcome to Shaw's Family Butchers — your trusted local butcher in Runcorn. We make all our own sausages and burgers fresh on the premises, daily.
+      </p>
+      <div class="hero-buttons">
+        <a href="beef.html" class="btn btn--accent">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Browse Our Shop
+        </a>
+        <a href="contact.html" class="btn btn--secondary">
+          Get In Touch
+        </a>
+      </div>
+    </div>
+    <a href="#welcome" class="hero-scroll">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+    </a>
+  </section>
+
+  <!-- Welcome Message -->
+  <section class="section" id="welcome">
+    <div class="container">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center;">
+        <div class="fade-in">
+          <h2 style="font-family:'Playfair Display',serif; font-size:2.2rem; margin-bottom:1.25rem; color:var(--text-primary);">Welcome</h2>
+          <p style="color:var(--text-secondary); line-height:1.8; margin-bottom:1rem; font-size:1.05rem;">Welcome to Shaw's Family Butchers website, and online shop, where you can browse and choose with no obligation. Different products will be added daily. We make all our own sausage and burgers on the premises.</p>
+          <p style="color:var(--text-secondary); line-height:1.8; margin-bottom:1.5rem; font-size:1.05rem;">Anything you don't see here, please don't hesitate to get in touch with us, via the <a href="contact.html" style="color:var(--primary); text-decoration:underline; font-weight:500;">contact page</a>.</p>
+          <div style="background:var(--bg-warm); border-left:4px solid var(--primary); border-radius:0 8px 8px 0; padding:1.25rem 1.5rem;">
+            <p style="color:var(--primary); font-weight:700; margin-bottom:0.35rem;">Please Note:</p>
+            <p style="color:var(--text-secondary); line-height:1.7; font-size:0.95rem;">All prices listed on each item are for guidance only, so it could be a little less or a little more, depending on the weight on the day. If unsure, please message us.</p>
+          </div>
+          <p style="color:var(--text-secondary); margin-top:1.5rem; font-size:1.05rem;">Many Thanks</p>
+        </div>
+        <div class="fade-in" style="text-align:center;">
+          <img src="images/shopfront.jpg" alt="Shaw's Butchers shop front with team" style="width:100%; max-width:540px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.12);" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Cards -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="features">
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3>Made With Love</h3>
+          <p>All our sausages and burgers are handmade fresh on the premises every single day, with the finest ingredients.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Quality Guaranteed</h3>
+          <p>We source only the best quality meat from trusted suppliers, ensuring every cut meets our high standards.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Family Run</h3>
+          <p>A proud family business serving the Runcorn community, carrying on Gary Shaw's legacy with passion and dedication.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title fade-in">Our Products</h2>
+      <div class="section-divider"></div>
+      <p class="section-subtitle fade-in">
+        Browse our full range of quality meats and products, all freshly prepared on the premises.
+      </p>
+
+      <!-- Category Cards -->
+      <div class="categories-grid">
+        <a href="beef.html" class="category-card fade-in">
+          <div class="category-bg" style="background: url('images/beef_sirloin_steak.jpg') center/cover;"></div>
+          <div class="category-overlay">
+            <h3>Beef</h3>
+            <p>Premium steaks, mince & more</p>
+            <span class="btn btn--accent btn--sm">View Range</span>
+          </div>
+        </a>
+
+        <a href="lamb.html" class="category-card fade-in">
+          <div class="category-bg" style="background: url('images/lamb_lamb_chops.jpg') center/cover;"></div>
+          <div class="category-overlay">
+            <h3>Lamb</h3>
+            <p>Chops, steaks & joints</p>
+            <span class="btn btn--accent btn--sm">View Range</span>
+          </div>
+        </a>
+
+        <a href="pork.html" class="category-card fade-in">
+          <div class="category-bg" style="background: url('images/pork_pork_chops.jpg') center/cover;"></div>
+          <div class="category-overlay">
+            <h3>Pork</h3>
+            <p>Chops, ribs & burgers</p>
+            <span class="btn btn--accent btn--sm">View Range</span>
+          </div>
+        </a>
+
+        <a href="chicken.html" class="category-card fade-in">
+          <div class="category-bg" style="background: url('images/chicken_whole_chicken.jpg') center/cover;"></div>
+          <div class="category-overlay">
+            <h3>Chicken</h3>
+            <p>Whole, fillets & flavoured</p>
+            <span class="btn btn--accent btn--sm">View Range</span>
+          </div>
+        </a>
+
+        <a href="bacon.html" class="category-card fade-in">
+          <div class="category-bg" style="background: url('images/bacon_back_bacon.jpg') center/cover;"></div>
+          <div class="category-overlay">
+            <h3>Bacon & Gammon</h3>
+            <p>Rashers, joints & chops</p>
+            <span class="btn btn--accent btn--sm">View Range</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Teaser -->
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image fade-in">
+          <img src="logo.png" alt="Shaw's Family Butchers" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:50%;">
+        </div>
+        <div class="about-text fade-in">
+          <h2>Our Family Story</h2>
+          <div class="section-divider"></div>
+          <p>Shaw's Butchers was opened by Gary Shaw, who was the pillar of Runcorn's community and was loved by so many. His son Danny then joined the fold, and Gary taught him everything he knows.</p>
+          <p>Danny now runs the shop with the help of Bev (Gary's wife), ensuring his father's legacy lives on through quality meat and genuine community service.</p>
+          <a href="about.html" class="btn btn--primary">Read Our Story</a>
+
+          <div class="about-stats">
+            <div class="about-stat">
+              <span class="number">10+</span>
+              <span class="label">Years Serving</span>
+            </div>
+            <div class="about-stat">
+              <span class="number">100%</span>
+              <span class="label">Handmade</span>
+            </div>
+            <div class="about-stat">
+              <span class="number">Daily</span>
+              <span class="label">Fresh Products</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notice Banner -->
+  <section class="notice-banner">
+    <div class="container">
+      <div class="notice-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Order Notice</h3>
+      <p>We need at least 1 day's notice once you place your order. For example, order today and it will be ready tomorrow, or anytime after that when requested. Thank you.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2C8 2 4 6 4 12c0 4 2 7 6 8l2 10h8l2-10c4-1 6-4 6-8 0-6-4-10-8-10"/>
+              <circle cx="16" cy="12" r="3"/>
+            </svg>
+            <span data-demo="shop-name">Shaw's</span> <span class="logo-accent">Butchers</span>
+          </a>
+          <p>Your trusted family butcher in Runcorn. Quality meats, handmade sausages and burgers, made fresh on the premises daily.</p>
+          <div class="footer-social">
+            <a href="https://facebook.com/G.B.shaws.butchers" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4>Quick Links</h4>
+          <div class="footer-links"><a href="index.html">Home</a><a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="specials.html">Special Offers</a><a href="allergen.html">Allergen Info</a></div>
+        </div>
+
+        <div>
+          <h4>Our Products</h4>
+          <div class="footer-links"><a href="beef.html">Beef</a><a href="lamb.html">Lamb</a><a href="pork.html">Pork</a><a href="chicken.html">Chicken</a><a href="sausage.html">Sausages</a><a href="bacon.html">Bacon & Gammon</a><a href="eggs.html">Eggs</a></div>
+        </div>
+
+        <div>
+          <h4>Get In Touch</h4>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <p data-demo="address">39 Church Street<br>Runcorn, WA7 1LX</p>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:01928561869" data-demo="phone">01928 561869</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:info@shawsbutchers.net">info@shawsbutchers.net</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2014 - 2026 <span data-demo="shop-name-full">Shaw's Family Butchers</span>. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/demo-mode.js"></script>
+</body>
+</html>
