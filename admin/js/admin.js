@@ -575,7 +575,7 @@
         <div class="order-info">
           <span class="order-customer">${order.customer?.name || 'Unknown'}</span>
           <div class="order-meta">
-            <span>📅 Collect: ${formatDate(order.customer?.collectionDate || order.date)}</span>
+            <span>📅 Collect: ${formatDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` @ ${order.customer.collectionTime}` : ''}</span>
             <span>📞 ${order.customer?.phone || 'N/A'}</span>
             <span>${order.items?.length || 0} items</span>
           </div>
@@ -618,7 +618,7 @@
           <h4>Order Info</h4>
           <p>
             <strong>Ordered:</strong> ${formatDateTime(order.date)}<br>
-            <strong>Collection:</strong> ${formatDate(order.customer?.collectionDate || '')}<br>
+            <strong>Collection:</strong> ${formatDate(order.customer?.collectionDate || '')}${order.customer?.collectionTime ? ` at ${order.customer.collectionTime}` : ''}<br>
             ${order.customer?.notes ? `<strong>Notes:</strong> ${order.customer.notes}` : ''}
           </p>
         </div>

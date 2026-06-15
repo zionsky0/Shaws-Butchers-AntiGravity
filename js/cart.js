@@ -341,6 +341,12 @@ const Cart = (() => {
               <input type="date" class="form-input" name="date" required>
             </div>
             <div class="form-group">
+              <label>Collection Time <span class="required">*</span></label>
+              <select class="form-input" name="time" required>
+                <option value="">Select a date first</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Special Instructions</label>
               <textarea class="form-input" name="notes" rows="3" placeholder="E.g. cut thickness, specific weights, etc."></textarea>
             </div>
@@ -352,13 +358,77 @@ const Cart = (() => {
       </div>
     `;
 
-    // Set min date to tomorrow
+    // Set min date to tomorrow and handle validation / time options based on hours
     const dateInput = basketContainer.querySelector('input[name="date"]');
-    if (dateInput) {
+    const timeSelect = basketContainer.querySelector('select[name="time"]');
+    if (dateInput && timeSelect) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      dateInput.min = tomorrow.toISOString().split('T')[0];
-      dateInput.value = tomorrow.toISOString().split('T')[0];
+      
+      // If tomorrow is Sunday, advance to Monday
+      if (tomorrow.getDay() === 0) {
+        tomorrow.setDate(tomorrow.getDate() + 1);
+      }
+      
+      const minDateStr = tomorrow.toISOString().split('T')[0];
+      dateInput.min = minDateStr;
+      dateInput.value = minDateStr;
+
+      const format12Hour = (hour, minutes) => {
+        const ampm = hour >= 12 ? 'pm' : 'am';
+        let hour12 = hour % 12;
+        if (hour12 === 0) hour12 = 12;
+        const minStr = minutes === 0 ? '00' : minutes.toString();
+        return `${hour12}:${minStr} ${ampm}`;
+      };
+
+      const updateTimes = () => {
+        const dateVal = dateInput.value;
+        if (!dateVal) {
+          timeSelect.innerHTML = '<option value="">Select a date first</option>';
+          return;
+        }
+        
+        const date = new Date(dateVal);
+        const day = date.getDay(); // 0 is Sunday, 1 is Monday, ..., 6 is Saturday
+        
+        if (day === 0) {
+          timeSelect.innerHTML = '<option value="">Closed on Sundays</option>';
+          dateInput.setCustomValidity('Shaw\'s Butchers is closed on Sundays. Please select another day.');
+          dateInput.reportValidity();
+          return;
+        } else {
+          dateInput.setCustomValidity('');
+        }
+
+        let startHour = 7;
+        let endHour = 15; // 3 PM
+        if (day === 3 || day === 6) { // Wednesday or Saturday (1 PM)
+          endHour = 13;
+        }
+
+        let optionsHTML = '<option value="">Select a collection time</option>';
+        for (let h = startHour; h <= endHour; h++) {
+          if (h === endHour) {
+            // Only add :00 for the closing hour
+            const timeStr = format12Hour(h, 0);
+            optionsHTML += `<option value="${timeStr}">${timeStr}</option>`;
+          } else {
+            const timeStr1 = format12Hour(h, 0);
+            optionsHTML += `<option value="${timeStr1}">${timeStr1}</option>`;
+            
+            const timeStr2 = format12Hour(h, 30);
+            optionsHTML += `<option value="${timeStr2}">${timeStr2}</option>`;
+          }
+        }
+        timeSelect.innerHTML = optionsHTML;
+      };
+
+      // Populate times initially
+      updateTimes();
+
+      // Update times and validate on date change
+      dateInput.addEventListener('change', updateTimes);
     }
 
     // Event listeners
@@ -433,6 +503,7 @@ const Cart = (() => {
         address: data.address || '',
         postcode: data.postcode || '',
         collectionDate: data.date,
+        collectionTime: data.time,
         notes: data.notes || ''
       },
       items: items.map(item => ({
@@ -488,7 +559,7 @@ const Cart = (() => {
           <div class="basket-success-details" style="margin: 1.5rem 0; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1.25rem;">
             <h4 style="margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; color: #111827; font-weight: 600;">Order Summary</h4>
             <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Order ID:</strong> #${order.id}</p>
-            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Collection Date:</strong> ${formatCollectionDate(data.date)}</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Collection Date:</strong> ${formatCollectionDate(data.date)} at ${data.time}</p>
             <p style="margin-bottom: 0; font-size: 0.92rem;"><strong>Estimated Total:</strong> £${order.total.toFixed(2)}</p>
           </div>
           
