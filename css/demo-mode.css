@@ -662,11 +662,15 @@ body.layout-compact .section-title {
 }
 
 body.layout-compact .categories-grid {
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
 }
 
 body.layout-compact .category-card {
+  flex: 1 1 160px;
+  max-width: 220px;
   aspect-ratio: 1;
 }
 
@@ -679,8 +683,15 @@ body.layout-compact .category-card p {
 }
 
 body.layout-compact .products-grid {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
+}
+
+body.layout-compact .product-card {
+  flex: 1 1 220px;
+  max-width: 280px;
 }
 
 body.layout-compact .page-hero {
