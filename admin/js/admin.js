@@ -1130,6 +1130,36 @@
       });
     }
 
+    // WhatsApp Config Settings
+    const waInput = $('#wa-number');
+    if (waInput) {
+      waInput.value = localStorage.getItem('shaws_whatsapp_number') || '';
+    }
+
+    const waForm = $('#whatsapp-config-form');
+    if (waForm) {
+      waForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const num = $('#wa-number').value.trim().replace(/[^0-9]/g, '');
+        if (num) {
+          localStorage.setItem('shaws_whatsapp_number', num);
+          window.GLOBAL_CONFIG.whatsappNumber = num;
+          showToast('WhatsApp number saved! Customers will now see a "Send via WhatsApp" button after ordering.');
+        } else {
+          showToast('Please enter a valid phone number.');
+        }
+      });
+    }
+
+    const waClearBtn = $('#whatsapp-clear-btn');
+    if (waClearBtn) {
+      waClearBtn.addEventListener('click', () => {
+        localStorage.removeItem('shaws_whatsapp_number');
+        window.GLOBAL_CONFIG.whatsappNumber = '';
+        if (waInput) waInput.value = '';
+        showToast('WhatsApp number removed.');
+      });
+    }
 
 
     // Poll for new orders every 30 seconds

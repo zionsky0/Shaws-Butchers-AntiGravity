@@ -322,6 +322,24 @@
               </form>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-header"><h3>WhatsApp Order Notifications</h3></div>
+            <div class="card-body">
+              <p class="setting-desc">Enter your WhatsApp phone number below. When a customer places an order, they'll be given the option to send the order details directly to your WhatsApp.</p>
+              <form id="whatsapp-config-form">
+                <div class="form-row">
+                  <label for="wa-number">WhatsApp Number (with country code)</label>
+                  <input type="tel" class="form-input" id="wa-number" name="waNumber" placeholder="e.g. 447912345678 (no + or spaces)">
+                </div>
+                <p class="setting-desc" style="font-size:0.8rem; margin-top:0.5rem; opacity:0.7;">UK numbers: replace the leading 0 with 44. E.g. 07912 345678 → 447912345678</p>
+                <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                  <button type="submit" class="btn btn-primary" style="flex:1">Save WhatsApp Number</button>
+                  <button type="button" class="btn btn-secondary" id="whatsapp-clear-btn" style="flex:1">Remove</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 
