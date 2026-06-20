@@ -612,6 +612,16 @@ const Cart = (() => {
     if (window.firebaseEnabled && window.db) {
       window.db.collection('orders').doc(orderId).set(order)
       .then(() => {
+        // Concurrently update Google Sheets in the background if configured
+        if (sheetUrl && isValidUrl(sheetUrl)) {
+          fetch(sheetUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: "create",
+              order: order
+            })
+          }).catch(err => console.error("Background Google Sheet Sync Error:", err));
+        }
         saveLocal();
         showSuccess();
       })

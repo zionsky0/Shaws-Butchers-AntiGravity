@@ -925,6 +925,17 @@
         showToast("Saving status to Cloud...");
         window.db.collection('orders').doc(orderId).update({ status: newStatus })
         .then(() => {
+          // Concurrently update Google Sheet in the background
+          if (sheetUrl) {
+            fetch(sheetUrl, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: "updateStatus",
+                id: orderId,
+                status: newStatus
+              })
+            }).catch(err => console.error("Background Sheet Status Update Error:", err));
+          }
           showToast(`Order #${orderId} status updated to "${newStatus}"`);
         })
         .catch(err => {
@@ -977,6 +988,16 @@
         showToast("Deleting from Cloud...");
         window.db.collection('orders').doc(orderId).delete()
         .then(() => {
+          // Concurrently delete from Google Sheet in the background
+          if (sheetUrl) {
+            fetch(sheetUrl, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: "delete",
+                id: orderId
+              })
+            }).catch(err => console.error("Background Sheet Order Delete Error:", err));
+          }
           showToast(`Order #${orderId} deleted`);
         })
         .catch(err => {
