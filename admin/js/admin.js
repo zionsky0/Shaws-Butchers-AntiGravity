@@ -279,6 +279,69 @@
     } catch { return dateStr; }
   };
 
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '';
+    if (typeof timeStr !== 'string') return String(timeStr);
+    // If it's a serialized 1899/ISO time-only date from Google Sheets, e.g. "1899-12-30T08:30:00.000Z"
+    if (timeStr.includes('T')) {
+      if (timeStr.startsWith('1899-')) {
+        const match = timeStr.match(/T(\d{2}):(\d{2})/);
+        if (match) {
+          let hours = parseInt(match[1], 10);
+          const minutes = match[2];
+          const ampm = hours >= 12 ? 'pm' : 'am';
+          hours = hours % 12;
+          hours = hours ? hours : 12; // 0 should be 12
+          return `${hours}:${minutes} ${ampm}`;
+        }
+      }
+      try {
+        const d = new Date(timeStr);
+        if (!isNaN(d.getTime())) {
+          let hours = d.getHours();
+          const minutes = String(d.getMinutes()).padStart(2, '0');
+          const ampm = hours >= 12 ? 'pm' : 'am';
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          return `${hours}:${minutes} ${ampm}`;
+        }
+      } catch {}
+    }
+    const standardMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?$/i);
+    if (standardMatch) {
+      let hours = parseInt(standardMatch[1], 10);
+      const minutes = standardMatch[2];
+      const ampm = (standardMatch[3] || '').toLowerCase() || (hours >= 12 ? 'pm' : 'am');
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      return `${hours}:${minutes} ${ampm}`;
+    }
+    return timeStr;
+  };
+
+  const getTimeMinutes = (timeStr) => {
+    if (!timeStr) return 9999;
+    if (typeof timeStr !== 'string') return 9999;
+    if (timeStr.includes('T')) {
+      const match = timeStr.match(/T(\d{2}):(\d{2})/);
+      if (match) {
+        const hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        return hours * 60 + minutes;
+      }
+    }
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?$/i);
+    if (match) {
+      let hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const ampm = (match[3] || '').toLowerCase();
+      if (ampm === 'pm' && hours < 12) hours += 12;
+      if (ampm === 'am' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    }
+    return 9999;
+  };
+
   const CATEGORY_LABELS = {
     beef: 'Beef',
     lamb: 'Lamb',
@@ -738,13 +801,301 @@
     reader.readAsDataURL(file);
   };
 
-  // ==================== ORDERS ====================
   let orderFilter = 'all';
   let orderSearch = '';
+  let calendarViewActive = false;
+  let calendarMode = 'weekly';
+  let calendarTargetDate = new Date();
+
+  const getStartOfWeek = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  };
+
+  const renderCalendar = () => {
+    updateCalendarHeader();
+    if (calendarMode === 'weekly') {
+      renderWeeklyCalendar();
+    } else {
+      renderDailyCalendar();
+    }
+  };
+
+  const updateCalendarHeader = () => {
+    const titleEl = $('#calendar-title');
+    if (!titleEl) return;
+    
+    if (calendarMode === 'weekly') {
+      const monday = getStartOfWeek(calendarTargetDate);
+      const saturday = new Date(monday);
+      saturday.setDate(monday.getDate() + 5);
+      
+      const monStr = monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const satStr = saturday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      titleEl.textContent = `${monStr} – ${satStr}`;
+    } else {
+      const dayStr = calendarTargetDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      titleEl.textContent = dayStr;
+    }
+    
+    const wBtn = $('#cal-mode-weekly');
+    const dBtn = $('#cal-mode-daily');
+    if (wBtn && dBtn) {
+      wBtn.classList.toggle('active', calendarMode === 'weekly');
+      dBtn.classList.toggle('active', calendarMode === 'daily');
+    }
+  };
+
+  const renderWeeklyCalendar = () => {
+    const grid = $('#calendar-timetable-grid');
+    if (!grid) return;
+    grid.className = 'calendar-timetable-grid week-grid';
+    
+    const monday = getStartOfWeek(calendarTargetDate);
+    const days = [];
+    for (let i = 0; i < 6; i++) { // Monday to Saturday
+      const dayDate = new Date(monday);
+      dayDate.setDate(monday.getDate() + i);
+      days.push(dayDate);
+    }
+    
+    const orders = getOrders();
+    let filtered = orders;
+    if (orderFilter !== 'all') {
+      filtered = filtered.filter(o => o.status === orderFilter);
+    }
+    if (orderSearch) {
+      const q = orderSearch.toLowerCase();
+      filtered = filtered.filter(o =>
+        (o.customer?.name || '').toLowerCase().includes(q) ||
+        (o.customer?.phone || '').toLowerCase().includes(q) ||
+        (o.customer?.email || '').toLowerCase().includes(q) ||
+        (o.customer?.address || '').toLowerCase().includes(q) ||
+        (o.customer?.postcode || '').toLowerCase().includes(q) ||
+        (o.id || '').toLowerCase().includes(q)
+      );
+    }
+    
+    const todayStr = new Date().toDateString();
+    
+    let html = '';
+    days.forEach(day => {
+      const isToday = day.toDateString() === todayStr;
+      const dayISOStr = day.toISOString().split('T')[0];
+      
+      const dayOrders = filtered.filter(o => {
+        if (!o.customer?.collectionDate) return false;
+        try {
+          let colDate = o.customer.collectionDate;
+          if (typeof colDate === 'string') {
+            colDate = colDate.split('T')[0];
+          } else {
+            colDate = new Date(colDate).toISOString().split('T')[0];
+          }
+          return colDate === dayISOStr;
+        } catch {
+          return false;
+        }
+      });
+      
+      dayOrders.sort((a, b) => getTimeMinutes(a.customer?.collectionTime) - getTimeMinutes(b.customer?.collectionTime));
+      
+      const dayName = day.toLocaleDateString('en-GB', { weekday: 'long' });
+      const dateFormatted = day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      
+      let cardsHtml = '';
+      if (dayOrders.length === 0) {
+        cardsHtml = `<p class="calendar-empty-day-text">No pickups</p>`;
+      } else {
+        cardsHtml = dayOrders.map(order => `
+          <div class="calendar-order-card" data-order-id="${order.id}">
+            <div class="calendar-order-time">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>${formatTime(order.customer?.collectionTime)}</span>
+            </div>
+            <div class="calendar-order-name">${order.customer?.name || 'Unknown'}</div>
+            <div class="calendar-order-meta">
+              <span>£${(order.total || 0).toFixed(2)}</span>
+              <span class="order-status order-status--${order.status}">${order.status}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      html += `
+        <div class="calendar-day-col ${isToday ? 'calendar-day-col--today' : ''}">
+          <div class="calendar-day-header">
+            <span class="calendar-day-name">${dayName}</span>
+            <span class="calendar-day-date">${dateFormatted}</span>
+          </div>
+          ${cardsHtml}
+        </div>
+      `;
+    });
+    
+    grid.innerHTML = html;
+    
+    grid.querySelectorAll('.calendar-order-card').forEach(card => {
+      card.addEventListener('click', () => openOrderDetail(card.dataset.orderId));
+    });
+  };
+
+  const renderDailyCalendar = () => {
+    const grid = $('#calendar-timetable-grid');
+    if (!grid) return;
+    grid.className = 'calendar-timetable-grid';
+    
+    const targetDay = calendarTargetDate.getDay(); // 0 = Sunday
+    if (targetDay === 0) {
+      grid.innerHTML = `
+        <div class="calendar-closed-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <h3>Shop Closed</h3>
+          <p>Shaw's Family Butchers is closed on Sundays.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    let startHour = 7;
+    let endHour = 15;
+    if (targetDay === 3 || targetDay === 6) { // Wednesday or Saturday
+      endHour = 13;
+    }
+    
+    const orders = getOrders();
+    let filtered = orders;
+    if (orderFilter !== 'all') {
+      filtered = filtered.filter(o => o.status === orderFilter);
+    }
+    if (orderSearch) {
+      const q = orderSearch.toLowerCase();
+      filtered = filtered.filter(o =>
+        (o.customer?.name || '').toLowerCase().includes(q) ||
+        (o.customer?.phone || '').toLowerCase().includes(q) ||
+        (o.customer?.email || '').toLowerCase().includes(q) ||
+        (o.customer?.address || '').toLowerCase().includes(q) ||
+        (o.customer?.postcode || '').toLowerCase().includes(q) ||
+        (o.id || '').toLowerCase().includes(q)
+      );
+    }
+    
+    const dayISOStr = calendarTargetDate.toISOString().split('T')[0];
+    
+    const dayOrders = filtered.filter(o => {
+      if (!o.customer?.collectionDate) return false;
+      try {
+        let colDate = o.customer.collectionDate;
+        if (typeof colDate === 'string') {
+          colDate = colDate.split('T')[0];
+        } else {
+          colDate = new Date(colDate).toISOString().split('T')[0];
+        }
+        return colDate === dayISOStr;
+      } catch {
+        return false;
+      }
+    });
+    
+    let html = '<div class="timetable-container">';
+    
+    for (let hour = startHour; hour <= endHour; hour++) {
+      const slotOrders = dayOrders.filter(o => {
+        const mins = getTimeMinutes(o.customer?.collectionTime);
+        if (mins === 9999) return false;
+        const slotStart = hour * 60;
+        const slotEnd = (hour + 1) * 60;
+        return mins >= slotStart && mins < slotEnd;
+      });
+      
+      slotOrders.sort((a, b) => getTimeMinutes(a.customer?.collectionTime) - getTimeMinutes(b.customer?.collectionTime));
+      
+      const hourStr = hour === 12 ? '12:00 PM' : (hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`);
+      
+      let cardsHtml = '';
+      if (slotOrders.length > 0) {
+        cardsHtml = slotOrders.map(order => `
+          <div class="calendar-order-card" data-order-id="${order.id}">
+            <div class="calendar-order-time">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>${formatTime(order.customer?.collectionTime)}</span>
+            </div>
+            <div class="calendar-order-name">${order.customer?.name || 'Unknown'}</div>
+            <div class="calendar-order-meta">
+              <span>£${(order.total || 0).toFixed(2)}</span>
+              <span class="order-status order-status--${order.status}">${order.status}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        cardsHtml = `<span style="font-size:0.78rem;color:var(--admin-text-muted);font-style:italic;">No pickups</span>`;
+      }
+      
+      html += `
+        <div class="timetable-row">
+          <div class="timetable-time-col">${hourStr}</div>
+          <div class="timetable-cards-col">${cardsHtml}</div>
+        </div>
+      `;
+    }
+    
+    const unscheduledOrders = dayOrders.filter(o => {
+      return getTimeMinutes(o.customer?.collectionTime) === 9999;
+    });
+    
+    if (unscheduledOrders.length > 0) {
+      let cardsHtml = unscheduledOrders.map(order => `
+        <div class="calendar-order-card" data-order-id="${order.id}">
+          <div class="calendar-order-time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>No Time</span>
+          </div>
+          <div class="calendar-order-name">${order.customer?.name || 'Unknown'}</div>
+          <div class="calendar-order-meta">
+            <span>£${(order.total || 0).toFixed(2)}</span>
+            <span class="order-status order-status--${order.status}">${order.status}</span>
+          </div>
+        </div>
+      `).join('');
+      
+      html += `
+        <div class="timetable-row">
+          <div class="timetable-time-col">Unscheduled</div>
+          <div class="timetable-cards-col">${cardsHtml}</div>
+        </div>
+      `;
+    }
+    
+    html += '</div>';
+    grid.innerHTML = html;
+    
+    grid.querySelectorAll('.calendar-order-card').forEach(card => {
+      card.addEventListener('click', () => openOrderDetail(card.dataset.orderId));
+    });
+  };
 
   const renderOrders = () => {
     const orders = getOrders();
     const container = $('#orders-list');
+    const calView = $('#orders-calendar-view');
+
+    if (calendarViewActive) {
+      if (calView) calView.style.display = 'block';
+      if (container) container.style.display = 'none';
+      renderCalendar();
+      updateOrdersBadge();
+      return;
+    } else {
+      if (calView) calView.style.display = 'none';
+      if (container) container.style.display = 'block';
+    }
 
     let filtered = orders;
     if (orderFilter !== 'all') {
@@ -776,7 +1127,7 @@
         <div class="order-info">
           <span class="order-customer">${order.customer?.name || 'Unknown'}</span>
           <div class="order-meta">
-            <span>📅 Collect: ${formatDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` @ ${order.customer.collectionTime}` : ''}</span>
+            <span>📅 Collect: ${formatDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` @ ${formatTime(order.customer.collectionTime)}` : ''}</span>
             <span>📞 ${order.customer?.phone || 'N/A'}</span>
             <span>${order.items?.length || 0} items</span>
           </div>
@@ -819,7 +1170,7 @@
           <h4>Order Info</h4>
           <p>
             <strong>Ordered:</strong> ${formatDateTime(order.date)}<br>
-            <strong>Collection:</strong> ${formatDate(order.customer?.collectionDate || '')}${order.customer?.collectionTime ? ` at ${order.customer.collectionTime}` : ''}<br>
+            <strong>Collection:</strong> ${formatDate(order.customer?.collectionDate || '')}${order.customer?.collectionTime ? ` at ${formatTime(order.customer.collectionTime)}` : ''}<br>
             ${order.customer?.notes ? `<strong>Notes:</strong> ${order.customer.notes}` : ''}
           </p>
         </div>
@@ -905,7 +1256,7 @@
           `*Order ID:* #${order.id}\n` +
           `*Customer Name:* ${order.customer?.name || 'Unknown'}\n` +
           `*Phone:* ${order.customer?.phone || 'N/A'}\n` +
-          `*Collection:* ${formatCollectionDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` at ${order.customer.collectionTime}` : ''}\n\n` +
+          `*Collection:* ${formatCollectionDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` at ${formatTime(order.customer.collectionTime)}` : ''}\n\n` +
           `*Items:*\n${itemsList}\n\n` +
           `*Estimated Total:* £${(order.total || 0).toFixed(2)}\n\n` +
           notesText +
@@ -1418,6 +1769,60 @@
       orderSearch = e.target.value.trim();
       renderOrders();
     });
+
+    // Calendar view toggle buttons
+    $$('.view-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        calendarViewActive = btn.dataset.view === 'calendar';
+        renderOrders();
+      });
+    });
+
+    // Calendar mode toggles (weekly/daily)
+    const modeWeeklyBtn = $('#cal-mode-weekly');
+    const modeDailyBtn = $('#cal-mode-daily');
+    if (modeWeeklyBtn && modeDailyBtn) {
+      modeWeeklyBtn.addEventListener('click', () => {
+        calendarMode = 'weekly';
+        renderCalendar();
+      });
+      modeDailyBtn.addEventListener('click', () => {
+        calendarMode = 'daily';
+        renderCalendar();
+      });
+    }
+
+    // Calendar navigation
+    const prevBtn = $('#cal-prev-btn');
+    const nextBtn = $('#cal-next-btn');
+    const todayBtn = $('#cal-today-btn');
+    
+    if (prevBtn && nextBtn && todayBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (calendarMode === 'weekly') {
+          calendarTargetDate.setDate(calendarTargetDate.getDate() - 7);
+        } else {
+          calendarTargetDate.setDate(calendarTargetDate.getDate() - 1);
+        }
+        renderCalendar();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (calendarMode === 'weekly') {
+          calendarTargetDate.setDate(calendarTargetDate.getDate() + 7);
+        } else {
+          calendarTargetDate.setDate(calendarTargetDate.getDate() + 1);
+        }
+        renderCalendar();
+      });
+
+      todayBtn.addEventListener('click', () => {
+        calendarTargetDate = new Date();
+        renderCalendar();
+      });
+    }
 
     // Add product button
     $('#add-product-btn').addEventListener('click', () => openProductModal());
