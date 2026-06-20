@@ -1517,11 +1517,20 @@
     if (waForm) {
       waForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const num = $('#wa-number').value.trim().replace(/[^0-9]/g, '');
+        let num = $('#wa-number').value.trim().replace(/[^0-9]/g, '');
+        
+        // Auto-format standard UK numbers starting with 0
+        if (num.startsWith('0') && num.length === 11) {
+          num = '44' + num.slice(1);
+        }
+        
+        // Update input visually to show formatted number
+        $('#wa-number').value = num;
+
         if (num) {
           if (window.firebaseEnabled && window.db) {
             window.db.collection('settings').doc('global').set({ whatsappNumber: num }, { merge: true })
-            .then(() => showToast('WhatsApp number saved in Cloud!'))
+            .then(() => showToast('WhatsApp number formatted and saved in Cloud!'))
             .catch(err => {
               console.error(err);
               showToast('⚠️ Failed to save WhatsApp number in Cloud');
@@ -1529,7 +1538,7 @@
           } else {
             localStorage.setItem('shaws_whatsapp_number', num);
             window.GLOBAL_CONFIG.whatsappNumber = num;
-            showToast('WhatsApp number saved! Customers will now see a "Send via WhatsApp" button after ordering.');
+            showToast('WhatsApp number formatted and saved!');
           }
         } else {
           showToast('Please enter a valid phone number.');
