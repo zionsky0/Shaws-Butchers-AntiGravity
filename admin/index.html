@@ -12,7 +12,7 @@
 <body>
 
   <!-- ===== Login Screen ===== -->
-  <div id="login-screen" class="login-screen">
+  <div id="login-screen" class="login-screen" hidden>
     <div class="login-card">
       <div class="login-logo">
         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -24,8 +24,12 @@
       </div>
       <form id="login-form">
         <div class="login-field">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" placeholder="dan@shawsbutchers.net" required autofocus>
+        </div>
+        <div class="login-field">
           <label for="login-pass">Password</label>
-          <input type="password" id="login-pass" placeholder="Enter admin password" autofocus>
+          <input type="password" id="login-pass" placeholder="Enter password" required>
         </div>
         <div class="remember-field" style="margin-bottom: 1.25rem;">
           <label class="checkbox-label">
@@ -34,9 +38,9 @@
           </label>
         </div>
         <button type="submit" class="btn-login">Sign In</button>
-        <p id="login-error" class="login-error" hidden>Incorrect password. Try again.</p>
+        <p id="login-error" class="login-error" hidden>Incorrect email or password. Try again.</p>
       </form>
-      <p class="login-hint">Default password: <strong>shaws2024</strong></p>
+      <p class="login-hint">Provide your Firebase Admin email and password to log in.</p>
     </div>
   </div>
 
@@ -306,6 +310,14 @@
             </div>
           </div>
 
+          <div class="card" id="cloud-seeding-card" style="display:none;">
+            <div class="card-header"><h3>Cloud Database Seeding</h3></div>
+            <div class="card-body">
+              <p class="setting-desc">Seed your Cloud database with all default products. This is highly recommended when setting up your Firebase database for the first time.</p>
+              <button class="btn btn-primary" id="seed-cloud-btn" style="width:100%;">Seed Default Products to Cloud</button>
+            </div>
+          </div>
+
           <div class="card">
             <div class="card-header"><h3>Google Sheets Live Sync</h3></div>
             <div class="card-body">
@@ -455,6 +467,11 @@
     <span id="toast-msg"></span>
   </div>
 
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
   <script src="../js/config.js"></script>
   <script src="js/admin.js"></script>
 </body>

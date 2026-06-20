@@ -14,6 +14,129 @@
 
   let fetchOrdersFromSheet = null;
 
+  // ===== FIREBASE SYNC STATE =====
+  let productsCache = [];
+  let ordersCache = [];
+  let globalSettings = {
+    whatsappNumber: "",
+    googleSheetUrl: ""
+  };
+
+  let unsubscribeProducts = null;
+  let unsubscribeOrders = null;
+  let unsubscribeSettings = null;
+
+  const startFirestoreSync = () => {
+    if (!window.firebaseEnabled || !window.db) return;
+
+    // Show status badge
+    const badgeEl = $('#sync-status-badge');
+    if (badgeEl) {
+      badgeEl.textContent = '🟢 Cloud Sync Active';
+      badgeEl.className = 'sync-status sync-status--connected';
+    }
+
+    // Show seeding card in settings
+    const seedingCard = $('#cloud-seeding-card');
+    if (seedingCard) seedingCard.style.display = '';
+
+    // 1. Sync Settings
+    unsubscribeSettings = window.db.collection('settings').doc('global').onSnapshot(doc => {
+      if (doc.exists) {
+        globalSettings = doc.data();
+      } else {
+        // Doc doesn't exist, create it with default local settings if present
+        globalSettings = {
+          whatsappNumber: localStorage.getItem('shaws_whatsapp_number') || "",
+          googleSheetUrl: localStorage.getItem('shaws_google_sheet_url') || ""
+        };
+        window.db.collection('settings').doc('global').set(globalSettings).catch(e => console.warn(e));
+      }
+      
+      // Update UI inputs
+      const waInput = $('#wa-number');
+      if (waInput) waInput.value = globalSettings.whatsappNumber || '';
+      const gsUrlInput = $('#gs-url');
+      if (gsUrlInput) gsUrlInput.value = globalSettings.googleSheetUrl || '';
+
+      // Update global config
+      if (!window.GLOBAL_CONFIG) window.GLOBAL_CONFIG = {};
+      window.GLOBAL_CONFIG.whatsappNumber = globalSettings.whatsappNumber;
+      window.GLOBAL_CONFIG.googleSheetUrl = globalSettings.googleSheetUrl;
+    });
+
+    // 2. Sync Products
+    unsubscribeProducts = window.db.collection('products').onSnapshot(snapshot => {
+      productsCache = [];
+      snapshot.forEach(doc => {
+        productsCache.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Update UI
+      renderProducts();
+      renderDashboard();
+    }, err => {
+      console.error("Products sync error:", err);
+    });
+
+    // 3. Sync Orders
+    unsubscribeOrders = window.db.collection('orders').onSnapshot(snapshot => {
+      const newOrders = [];
+      snapshot.forEach(doc => {
+        newOrders.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Sort: Firestore returns unordered, sort locally by date
+      newOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // Play sound and toast for new orders (compared to ordersCache)
+      if (ordersCache.length > 0 && newOrders.length > ordersCache.length) {
+        try {
+          showToast("🔔 New Order Received!");
+          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav");
+          audio.volume = 0.5;
+          audio.play().catch(e => console.log("Sound play blocked:", e));
+        } catch (err) {}
+      }
+
+      ordersCache = newOrders;
+
+      // Re-render UI
+      updateOrdersBadge();
+      if (currentPage === 'orders') renderOrders();
+      if (currentPage === 'dashboard') renderDashboard();
+    }, err => {
+      console.error("Orders sync error:", err);
+    });
+  };
+
+  const stopFirestoreSync = () => {
+    if (unsubscribeProducts) unsubscribeProducts();
+    if (unsubscribeOrders) unsubscribeOrders();
+    if (unsubscribeSettings) unsubscribeSettings();
+  };
+
+  const seedCloudDatabase = () => {
+    if (!window.firebaseEnabled || !window.db) return;
+    if (!confirm("Are you sure you want to seed the Cloud database with all 86 default products? This will overwrite existing products with the same IDs.")) return;
+    
+    showToast("Seeding cloud database...");
+    const batch = window.db.batch();
+    DEFAULT_PRODUCTS.forEach(p => {
+      const docRef = window.db.collection('products').doc(p.id);
+      batch.set(docRef, p);
+    });
+    
+    batch.commit()
+    .then(() => {
+      showToast("Cloud database seeded successfully!");
+    })
+    .catch(err => {
+      console.error("Seeding failed:", err);
+      showToast("⚠️ Seeding failed: " + err.message);
+    });
+  };
+
   // ==================== DEFAULT PRODUCTS ====================
   // These match the hardcoded products on the website
   const DEFAULT_PRODUCTS = [
@@ -92,6 +215,9 @@
   const getPassword = () => localStorage.getItem(KEYS.PASSWORD) || DEFAULT_PASSWORD;
 
   const getProducts = () => {
+    if (window.firebaseEnabled) {
+      return productsCache.length > 0 ? productsCache : null;
+    }
     try {
       const data = localStorage.getItem(KEYS.PRODUCTS);
       return data ? JSON.parse(data) : null;
@@ -99,6 +225,10 @@
   };
 
   const saveProducts = (products) => {
+    if (window.firebaseEnabled && window.db) {
+      // Products are synced in real-time, no batch array save needed locally
+      return;
+    }
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
   };
 
@@ -106,12 +236,17 @@
     let products = getProducts();
     if (!products) {
       products = DEFAULT_PRODUCTS;
-      saveProducts(products);
+      if (!window.firebaseEnabled) {
+        saveProducts(products);
+      }
     }
     return products;
   };
 
   const getOrders = () => {
+    if (window.firebaseEnabled) {
+      return ordersCache;
+    }
     try {
       const data = localStorage.getItem(KEYS.ORDERS);
       return data ? JSON.parse(data) : [];
@@ -119,6 +254,10 @@
   };
 
   const saveOrders = (orders) => {
+    if (window.firebaseEnabled && window.db) {
+      // Orders are synced in real-time
+      return;
+    }
     localStorage.setItem(KEYS.ORDERS, JSON.stringify(orders));
   };
 
@@ -173,10 +312,14 @@
 
   // ==================== AUTH ====================
   const checkAuth = () => {
+    if (window.firebaseEnabled && window.auth) {
+      return window.auth.currentUser !== null;
+    }
     return sessionStorage.getItem(KEYS.SESSION) === 'true' || localStorage.getItem(KEYS.SESSION) === 'true';
   };
 
   const login = (password, rememberMe) => {
+    // Local fallback login
     if (password === getPassword()) {
       if (rememberMe) {
         localStorage.setItem(KEYS.SESSION, 'true');
@@ -189,20 +332,32 @@
   };
 
   const logout = () => {
-    sessionStorage.removeItem(KEYS.SESSION);
-    localStorage.removeItem(KEYS.SESSION);
-    showLogin();
+    if (window.firebaseEnabled && window.auth) {
+      stopFirestoreSync();
+      window.auth.signOut().then(() => {
+        showLogin();
+      });
+    } else {
+      sessionStorage.removeItem(KEYS.SESSION);
+      localStorage.removeItem(KEYS.SESSION);
+      showLogin();
+    }
   };
 
   const showLogin = () => {
     $('#login-screen').hidden = false;
     $('#app').hidden = true;
+    stopFirestoreSync();
   };
 
   const showApp = () => {
     $('#login-screen').hidden = true;
     $('#app').hidden = false;
-    initDashboard();
+    if (window.firebaseEnabled) {
+      startFirestoreSync();
+    } else {
+      initDashboard();
+    }
   };
 
   // ==================== NAVIGATION ====================
@@ -391,11 +546,23 @@
     const product = products.find(p => p.id === id);
     if (!product) return;
     if (!confirm(`Are you sure you want to delete "${product.name}"?`)) return;
-    const updated = products.filter(p => p.id !== id);
-    saveProducts(updated);
-    renderProducts();
-    renderDashboard();
-    showToast(`"${product.name}" deleted`);
+
+    if (window.firebaseEnabled && window.db) {
+      window.db.collection('products').doc(id).delete()
+      .then(() => {
+        showToast(`"${product.name}" deleted from Cloud`);
+      })
+      .catch(err => {
+        console.error("Firestore delete product error:", err);
+        showToast("⚠️ Failed to delete product in cloud");
+      });
+    } else {
+      const updated = products.filter(p => p.id !== id);
+      saveProducts(updated);
+      renderProducts();
+      renderDashboard();
+      showToast(`"${product.name}" deleted`);
+    }
   };
 
   // ==================== PRODUCT MODAL ====================
@@ -466,14 +633,14 @@
     const available = $('#pf-available').checked;
     const soldOut = $('#pf-soldout').checked;
 
-    const products = loadProducts();
+    const products = loadProducts() || [];
+    let productObj = {};
 
     if (editingProductId) {
       // Edit existing
-      const idx = products.findIndex(p => p.id === editingProductId);
-      if (idx === -1) return;
-      products[idx] = {
-        ...products[idx],
+      const existingProduct = products.find(p => p.id === editingProductId);
+      productObj = {
+        id: editingProductId,
         name,
         category,
         price,
@@ -482,9 +649,30 @@
         badge,
         available,
         soldOut,
-        image: currentPhotoData || products[idx].image
+        image: currentPhotoData || (existingProduct ? existingProduct.image : '')
       };
-      showToast(`"${name}" updated`);
+
+      if (window.firebaseEnabled && window.db) {
+        window.db.collection('products').doc(editingProductId).set(productObj)
+        .then(() => {
+          showToast(`"${name}" updated in Cloud`);
+          closeProductModal();
+        })
+        .catch(err => {
+          console.error("Firestore update error:", err);
+          showToast("⚠️ Failed to update product in cloud");
+        });
+      } else {
+        const idx = products.findIndex(p => p.id === editingProductId);
+        if (idx !== -1) {
+          products[idx] = productObj;
+          saveProducts(products);
+          showToast(`"${name}" updated`);
+          closeProductModal();
+          renderProducts();
+          renderDashboard();
+        }
+      }
     } else {
       // Add new
       const id = generateProductId(name);
@@ -492,7 +680,7 @@
         alert('A product with a very similar name already exists. Please use a different name.');
         return;
       }
-      products.push({
+      productObj = {
         id,
         name,
         category,
@@ -503,14 +691,27 @@
         available,
         soldOut,
         image: currentPhotoData || ''
-      });
-      showToast(`"${name}" added`);
-    }
+      };
 
-    saveProducts(products);
-    closeProductModal();
-    renderProducts();
-    renderDashboard();
+      if (window.firebaseEnabled && window.db) {
+        window.db.collection('products').doc(id).set(productObj)
+        .then(() => {
+          showToast(`"${name}" added to Cloud`);
+          closeProductModal();
+        })
+        .catch(err => {
+          console.error("Firestore add error:", err);
+          showToast("⚠️ Failed to add product in cloud");
+        });
+      } else {
+        products.push(productObj);
+        saveProducts(products);
+        showToast(`"${name}" added`);
+        closeProductModal();
+        renderProducts();
+        renderDashboard();
+      }
+    }
   };
 
   // Photo upload
@@ -651,6 +852,17 @@
     `;
 
     const footer = $('#order-modal-footer');
+    const waNumber = (window.firebaseEnabled ? globalSettings.whatsappNumber : (localStorage.getItem('shaws_whatsapp_number') || ''));
+    let waButtonHtml = '';
+    if (waNumber) {
+      waButtonHtml = `
+        <button class="btn btn-success btn-sm" id="admin-whatsapp-btn" style="background:#25D366;border-color:#25D366;color:#fff;">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;margin-right:4px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send to WhatsApp
+        </button>
+      `;
+    }
+
     footer.innerHTML = `
       <div style="display:flex;align-items:center;gap:0.75rem;flex:1;flex-wrap:wrap">
         <label style="font-weight:600;font-size:0.85rem;">Status:</label>
@@ -662,15 +874,64 @@
         </select>
         <button class="btn btn-primary btn-sm" id="save-order-status">Update Status</button>
       </div>
-      <button class="btn btn-danger btn-sm" id="delete-order-btn" data-id="${order.id}">Delete Order</button>
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        ${waButtonHtml}
+        <button class="btn btn-danger btn-sm" id="delete-order-btn" data-id="${order.id}">Delete Order</button>
+      </div>
     `;
+
+    // WhatsApp forward handler
+    const waBtn = footer.querySelector('#admin-whatsapp-btn');
+    if (waBtn) {
+      waBtn.addEventListener('click', () => {
+        const itemsList = (order.items || []).map(item =>
+          `• ${item.name} x${item.qty} — £${((item.price || 0) * item.qty).toFixed(2)}`
+        ).join('\n');
+        
+        const formatCollectionDate = (dateStr) => {
+          try {
+            if (!dateStr) return 'N/A';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          } catch (err) {
+            return dateStr || 'N/A';
+          }
+        };
+
+        const notesText = order.customer?.notes ? `*Notes:* ${order.customer.notes}\n\n` : '';
+        const waMessage = encodeURIComponent(
+          `🥩 *Shaw's Butchers Order Summary*\n\n` +
+          `*Order ID:* #${order.id}\n` +
+          `*Customer Name:* ${order.customer?.name || 'Unknown'}\n` +
+          `*Phone:* ${order.customer?.phone || 'N/A'}\n` +
+          `*Collection:* ${formatCollectionDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` at ${order.customer.collectionTime}` : ''}\n\n` +
+          `*Items:*\n${itemsList}\n\n` +
+          `*Estimated Total:* £${(order.total || 0).toFixed(2)}\n\n` +
+          notesText +
+          `Status: *${order.status.toUpperCase()}*`
+        );
+        const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+      });
+    }
 
     // Save status
     footer.querySelector('#save-order-status').addEventListener('click', () => {
       const newStatus = footer.querySelector('#order-status-change').value;
       const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
       
-      if (sheetUrl) {
+      if (window.firebaseEnabled && window.db) {
+        showToast("Saving status to Cloud...");
+        window.db.collection('orders').doc(orderId).update({ status: newStatus })
+        .then(() => {
+          showToast(`Order #${orderId} status updated to "${newStatus}"`);
+        })
+        .catch(err => {
+          console.error("Firestore status update error:", err);
+          showToast("⚠️ Failed to update status in Cloud");
+        });
+      } else if (sheetUrl) {
         showToast("Saving status to cloud...");
         fetch(sheetUrl, {
           method: 'POST',
@@ -712,7 +973,17 @@
       if (!confirm('Are you sure you want to delete this order?')) return;
       const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
       
-      if (sheetUrl) {
+      if (window.firebaseEnabled && window.db) {
+        showToast("Deleting from Cloud...");
+        window.db.collection('orders').doc(orderId).delete()
+        .then(() => {
+          showToast(`Order #${orderId} deleted`);
+        })
+        .catch(err => {
+          console.error("Firestore delete order error:", err);
+          showToast("⚠️ Failed to delete order in Cloud");
+        });
+      } else if (sheetUrl) {
         showToast("Deleting from cloud...");
         fetch(sheetUrl, {
           method: 'POST',
@@ -753,6 +1024,7 @@
   };
 
   // ==================== SETTINGS ====================
+  // ==================== SETTINGS ====================
   const handlePasswordChange = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -761,22 +1033,41 @@
     const newPass = formData.get('newPass');
     const confirm = formData.get('confirm');
 
-    if (current !== getPassword()) {
-      alert('Current password is incorrect.');
-      return;
-    }
     if (newPass !== confirm) {
       alert('New passwords do not match.');
       return;
     }
-    if (newPass.length < 4) {
-      alert('Password must be at least 4 characters.');
+    if (newPass.length < 6) {
+      alert('Password must be at least 6 characters in Firebase.');
       return;
     }
 
-    localStorage.setItem(KEYS.PASSWORD, newPass);
-    form.reset();
-    showToast('Password updated successfully');
+    if (window.firebaseEnabled && window.auth && window.auth.currentUser) {
+      const user = window.auth.currentUser;
+      const credential = firebase.auth.EmailAuthProvider.credential(user.email, current);
+      
+      showToast("Updating password in Cloud...");
+      user.reauthenticateWithCredential(credential)
+      .then(() => {
+        return user.updatePassword(newPass);
+      })
+      .then(() => {
+        form.reset();
+        showToast('Password updated in Cloud successfully!');
+      })
+      .catch(err => {
+        console.error("Firebase Password Update Error:", err);
+        alert('Failed to update password. Please check your current password and try again.');
+      });
+    } else {
+      if (current !== getPassword()) {
+        alert('Current password is incorrect.');
+        return;
+      }
+      localStorage.setItem(KEYS.PASSWORD, newPass);
+      form.reset();
+      showToast('Password updated successfully');
+    }
   };
 
   const exportData = () => {
@@ -801,14 +1092,34 @@
       try {
         const data = JSON.parse(e.target.result);
         if (data.products && Array.isArray(data.products)) {
-          saveProducts(data.products);
+          if (window.firebaseEnabled && window.db) {
+            showToast("Importing products to cloud...");
+            const batch = window.db.batch();
+            data.products.forEach(p => {
+              batch.set(window.db.collection('products').doc(p.id), p);
+            });
+            batch.commit().catch(err => console.error(err));
+          } else {
+            saveProducts(data.products);
+          }
         }
         if (data.orders && Array.isArray(data.orders)) {
-          saveOrders(data.orders);
+          if (window.firebaseEnabled && window.db) {
+            showToast("Importing orders to cloud...");
+            const batch = window.db.batch();
+            data.orders.forEach(o => {
+              batch.set(window.db.collection('orders').doc(o.id), o);
+            });
+            batch.commit().catch(err => console.error(err));
+          } else {
+            saveOrders(data.orders);
+          }
         }
-        renderProducts();
-        renderOrders();
-        renderDashboard();
+        if (!window.firebaseEnabled) {
+          renderProducts();
+          renderOrders();
+          renderDashboard();
+        }
         showToast('Data imported successfully');
       } catch {
         alert('Invalid JSON file. Please check the format.');
@@ -820,11 +1131,34 @@
   const resetData = () => {
     if (!confirm('⚠️ This will delete ALL products, orders, and settings. Are you sure?')) return;
     if (!confirm('This cannot be undone. Type "yes" to confirm.')) return;
-    localStorage.removeItem(KEYS.PRODUCTS);
-    localStorage.removeItem(KEYS.ORDERS);
-    localStorage.removeItem(KEYS.PASSWORD);
-    showToast('All data has been reset');
-    initDashboard();
+    
+    if (window.firebaseEnabled && window.db) {
+      showToast("Resetting Cloud Database...");
+      const batch = window.db.batch();
+      batch.delete(window.db.collection('settings').doc('global'));
+      
+      productsCache.forEach(p => {
+        batch.delete(window.db.collection('products').doc(p.id));
+      });
+      ordersCache.forEach(o => {
+        batch.delete(window.db.collection('orders').doc(o.id));
+      });
+      
+      batch.commit()
+      .then(() => {
+        showToast('Cloud database reset successfully');
+      })
+      .catch(err => {
+        console.error(err);
+        showToast('⚠️ Reset failed: ' + err.message);
+      });
+    } else {
+      localStorage.removeItem(KEYS.PRODUCTS);
+      localStorage.removeItem(KEYS.ORDERS);
+      localStorage.removeItem(KEYS.PASSWORD);
+      showToast('All data has been reset');
+      initDashboard();
+    }
   };
 
   // ==================== DARK MODE ====================
@@ -883,19 +1217,23 @@
     // Dark mode — apply immediately before anything renders
     initDarkMode();
 
-    // Google Sheets Sync status badge
+    // Google Sheets Sync status badge setup
     const badgeEl = $('#sync-status-badge');
     const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
     
-    if (sheetUrl) {
+    if (window.firebaseEnabled) {
+      if (badgeEl) {
+        badgeEl.textContent = '🟢 Cloud Mode';
+        badgeEl.className = 'sync-status sync-status--connected';
+      }
+    } else if (sheetUrl) {
       if (badgeEl) {
         badgeEl.textContent = '🟢 Live Sync Active';
         badgeEl.className = 'sync-status sync-status--connected';
       }
       
-      // Define fetchOrdersFromSheet
       fetchOrdersFromSheet = () => {
-        if (!checkAuth()) return; // only fetch if logged in
+        if (!checkAuth()) return;
         fetch(sheetUrl)
         .then(res => {
           if (!res.ok) throw new Error("Fetch failed");
@@ -903,11 +1241,9 @@
         })
         .then(newOrders => {
           if (Array.isArray(newOrders)) {
-            // Check for new orders to play chime/toast
             const oldOrdersStr = localStorage.getItem(KEYS.ORDERS);
             const oldOrders = oldOrdersStr ? JSON.parse(oldOrdersStr) : [];
             
-            // If new orders are found and we aren't loading for the first time
             if (oldOrders.length > 0 && newOrders.length > oldOrders.length) {
               try {
                 showToast("🔔 New Order Received!");
@@ -918,8 +1254,6 @@
             }
             
             localStorage.setItem(KEYS.ORDERS, JSON.stringify(newOrders));
-            
-            // Re-render UI
             updateOrdersBadge();
             if (currentPage === 'orders') renderOrders();
             if (currentPage === 'dashboard') renderDashboard();
@@ -930,12 +1264,10 @@
         });
       };
       
-      // Sync immediately on load
       setTimeout(() => {
         fetchOrdersFromSheet();
       }, 500);
       
-      // Poll every 15 seconds for updates
       setInterval(() => {
         fetchOrdersFromSheet();
       }, 15000);
@@ -946,11 +1278,21 @@
       }
     }
 
-    // Auth
-    if (checkAuth()) {
-      showApp();
+    // Auth Initialization
+    if (window.firebaseEnabled && window.auth) {
+      window.auth.onAuthStateChanged((user) => {
+        if (user) {
+          showApp();
+        } else {
+          showLogin();
+        }
+      });
     } else {
-      showLogin();
+      if (checkAuth()) {
+        showApp();
+      } else {
+        showLogin();
+      }
     }
 
     // Login form
@@ -958,12 +1300,29 @@
       e.preventDefault();
       const pass = $('#login-pass').value;
       const remember = $('#login-remember')?.checked;
-      if (login(pass, remember)) {
-        showApp();
+      
+      if (window.firebaseEnabled && window.auth) {
+        const email = $('#login-email').value.trim();
+        const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+        
+        window.auth.setPersistence(persistence)
+        .then(() => {
+          return window.auth.signInWithEmailAndPassword(email, pass);
+        })
+        .catch(err => {
+          console.error("Firebase Login Error:", err);
+          $('#login-error').hidden = false;
+          $('#login-pass').value = '';
+          $('#login-pass').focus();
+        });
       } else {
-        $('#login-error').hidden = false;
-        $('#login-pass').value = '';
-        $('#login-pass').focus();
+        if (login(pass, remember)) {
+          showApp();
+        } else {
+          $('#login-error').hidden = false;
+          $('#login-pass').value = '';
+          $('#login-pass').focus();
+        }
       }
     });
 
@@ -1112,9 +1471,18 @@
         e.preventDefault();
         const url = $('#gs-url').value.trim();
         if (url) {
-          localStorage.setItem('shaws_google_sheet_url', url);
-          alert('Google Sheets Sync URL saved! The page will now reload.');
-          window.location.reload();
+          if (window.firebaseEnabled && window.db) {
+            window.db.collection('settings').doc('global').set({ googleSheetUrl: url }, { merge: true })
+            .then(() => showToast('Google Sheets Sync URL saved in Cloud!'))
+            .catch(err => {
+              console.error(err);
+              showToast('⚠️ Failed to save Google Sheets URL in Cloud');
+            });
+          } else {
+            localStorage.setItem('shaws_google_sheet_url', url);
+            alert('Google Sheets Sync URL saved! The page will now reload.');
+            window.location.reload();
+          }
         }
       });
     }
@@ -1122,10 +1490,19 @@
     const gsheetClearBtn = $('#gsheet-clear-btn');
     if (gsheetClearBtn) {
       gsheetClearBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to disconnect Google Sheets sync? You will return to local-only mode.')) {
-          localStorage.removeItem('shaws_google_sheet_url');
-          alert('Google Sheets Sync disabled! The page will now reload.');
-          window.location.reload();
+        if (confirm('Are you sure you want to disconnect Google Sheets sync?')) {
+          if (window.firebaseEnabled && window.db) {
+            window.db.collection('settings').doc('global').set({ googleSheetUrl: "" }, { merge: true })
+            .then(() => showToast('Google Sheets Sync disconnected in Cloud!'))
+            .catch(err => {
+              console.error(err);
+              showToast('⚠️ Failed to disconnect Google Sheets in Cloud');
+            });
+          } else {
+            localStorage.removeItem('shaws_google_sheet_url');
+            alert('Google Sheets Sync disabled! The page will now reload.');
+            window.location.reload();
+          }
         }
       });
     }
@@ -1142,9 +1519,18 @@
         e.preventDefault();
         const num = $('#wa-number').value.trim().replace(/[^0-9]/g, '');
         if (num) {
-          localStorage.setItem('shaws_whatsapp_number', num);
-          window.GLOBAL_CONFIG.whatsappNumber = num;
-          showToast('WhatsApp number saved! Customers will now see a "Send via WhatsApp" button after ordering.');
+          if (window.firebaseEnabled && window.db) {
+            window.db.collection('settings').doc('global').set({ whatsappNumber: num }, { merge: true })
+            .then(() => showToast('WhatsApp number saved in Cloud!'))
+            .catch(err => {
+              console.error(err);
+              showToast('⚠️ Failed to save WhatsApp number in Cloud');
+            });
+          } else {
+            localStorage.setItem('shaws_whatsapp_number', num);
+            window.GLOBAL_CONFIG.whatsappNumber = num;
+            showToast('WhatsApp number saved! Customers will now see a "Send via WhatsApp" button after ordering.');
+          }
         } else {
           showToast('Please enter a valid phone number.');
         }
@@ -1154,11 +1540,28 @@
     const waClearBtn = $('#whatsapp-clear-btn');
     if (waClearBtn) {
       waClearBtn.addEventListener('click', () => {
-        localStorage.removeItem('shaws_whatsapp_number');
-        window.GLOBAL_CONFIG.whatsappNumber = '';
-        if (waInput) waInput.value = '';
-        showToast('WhatsApp number removed.');
+        if (window.firebaseEnabled && window.db) {
+          window.db.collection('settings').doc('global').set({ whatsappNumber: "" }, { merge: true })
+          .then(() => showToast('WhatsApp number removed from Cloud.'))
+          .catch(err => {
+            console.error(err);
+            showToast('⚠️ Failed to remove WhatsApp number from Cloud');
+          });
+        } else {
+          localStorage.removeItem('shaws_whatsapp_number');
+          window.GLOBAL_CONFIG.whatsappNumber = '';
+          if (waInput) waInput.value = '';
+          showToast('WhatsApp number removed.');
+        }
       });
+    }
+
+    // Cloud Database Seeding listener
+    if (window.firebaseEnabled) {
+      const seedingCard = $('#cloud-seeding-card');
+      if (seedingCard) seedingCard.style.display = '';
+      const seedBtn = $('#seed-cloud-btn');
+      if (seedBtn) seedBtn.addEventListener('click', seedCloudDatabase);
     }
 
 
