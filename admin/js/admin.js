@@ -1888,7 +1888,7 @@
     // Google Sheets Config Settings
     const gsUrlInput = $('#gs-url');
     if (gsUrlInput) {
-      gsUrlInput.value = localStorage.getItem('shaws_google_sheet_url') || '';
+      gsUrlInput.value = (window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl) || localStorage.getItem('shaws_google_sheet_url') || '';
     }
 
     const gsheetForm = $('#gsheet-config-form');
@@ -1936,7 +1936,7 @@
     // WhatsApp Config Settings
     const waInput = $('#wa-number');
     if (waInput) {
-      waInput.value = localStorage.getItem('shaws_whatsapp_number') || '';
+      waInput.value = (window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.whatsappNumber) || localStorage.getItem('shaws_whatsapp_number') || '';
     }
 
     const waForm = $('#whatsapp-config-form');
