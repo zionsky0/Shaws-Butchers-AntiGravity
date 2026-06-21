@@ -480,7 +480,7 @@ const Cart = (() => {
       const details = {
         name: data.name || '',
         phone: data.phone || '',
-        email: data.email || '',
+        email: data.email || '', 
         address: data.address || '',
         postcode: data.postcode || ''
       };
