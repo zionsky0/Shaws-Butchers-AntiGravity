@@ -1189,7 +1189,7 @@
         <tbody>
           ${(order.items || []).map((item, idx) => `
             <tr class="order-item-row">
-              <td style="text-align: center;" onclick="event.stopPropagation();">
+              <td style="text-align: center;" class="prep-checkbox-cell">
                 <input type="checkbox" class="item-prep-checkbox" id="prep-chk-${idx}">
               </td>
               <td class="item-name-cell">${item.name}</td>
@@ -1208,19 +1208,19 @@
 
     // Setup checklist item row toggling for the butcher
     body.querySelectorAll('.order-item-row').forEach(row => {
-      row.addEventListener('click', () => {
+      row.addEventListener('click', (e) => {
         const chk = row.querySelector('.item-prep-checkbox');
-        if (chk) {
+        if (!chk) return;
+        
+        if (e.target === chk) {
+          // Clicked directly on the checkbox. Browser handles toggle, we handle the visual class
+          row.classList.toggle('prepared', chk.checked);
+        } else {
+          // Clicked elsewhere on the row. We toggle it programmatically and handle the class
           chk.checked = !chk.checked;
           row.classList.toggle('prepared', chk.checked);
         }
       });
-      const chk = row.querySelector('.item-prep-checkbox');
-      if (chk) {
-        chk.addEventListener('change', () => {
-          row.classList.toggle('prepared', chk.checked);
-        });
-      }
     });
 
     const footer = $('#order-modal-footer');

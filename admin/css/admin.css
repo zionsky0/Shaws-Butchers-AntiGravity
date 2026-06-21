@@ -1523,7 +1523,7 @@ table { border-collapse: collapse; width: 100%; }
   background: rgba(0, 0, 0, 0.7);
 }
 
-[data-theme="dark"] input,
+[data-theme="dark"] input:not([type="checkbox"]),
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
   background: var(--admin-bg);
@@ -1734,7 +1734,7 @@ table { border-collapse: collapse; width: 100%; }
     font-size: 1rem;
   }
 
-  input, select, textarea {
+  input:not([type="checkbox"]), select, textarea {
     min-height: 44px;
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
