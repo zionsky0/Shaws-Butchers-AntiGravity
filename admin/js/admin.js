@@ -1179,6 +1179,7 @@
       <table class="order-items-table">
         <thead>
           <tr>
+            <th style="width: 45px; text-align: center;">Prep</th>
             <th>Item</th>
             <th>Price</th>
             <th>Qty</th>
@@ -1186,21 +1187,41 @@
           </tr>
         </thead>
         <tbody>
-          ${(order.items || []).map(item => `
-            <tr>
-              <td>${item.name}</td>
+          ${(order.items || []).map((item, idx) => `
+            <tr class="order-item-row">
+              <td style="text-align: center;" onclick="event.stopPropagation();">
+                <input type="checkbox" class="item-prep-checkbox" id="prep-chk-${idx}">
+              </td>
+              <td class="item-name-cell">${item.name}</td>
               <td>£${(item.price || 0).toFixed(2)} ${item.unit || ''}</td>
               <td>${item.qty}</td>
               <td style="text-align:right">£${((item.price || 0) * item.qty).toFixed(2)}</td>
             </tr>
           `).join('')}
           <tr class="total-row">
-            <td colspan="3">Estimated Total</td>
+            <td colspan="4">Estimated Total</td>
             <td style="text-align:right">£${(order.total || 0).toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
     `;
+
+    // Setup checklist item row toggling for the butcher
+    body.querySelectorAll('.order-item-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const chk = row.querySelector('.item-prep-checkbox');
+        if (chk) {
+          chk.checked = !chk.checked;
+          row.classList.toggle('prepared', chk.checked);
+        }
+      });
+      const chk = row.querySelector('.item-prep-checkbox');
+      if (chk) {
+        chk.addEventListener('change', () => {
+          row.classList.toggle('prepared', chk.checked);
+        });
+      }
+    });
 
     const footer = $('#order-modal-footer');
     const waNumber = (window.firebaseEnabled ? globalSettings.whatsappNumber : (localStorage.getItem('shaws_whatsapp_number') || ''));

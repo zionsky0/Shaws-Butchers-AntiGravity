@@ -919,6 +919,36 @@ table { border-collapse: collapse; width: 100%; }
   color: var(--admin-primary);
 }
 
+.order-item-row {
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.order-item-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .order-item-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.order-item-row.prepared {
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.order-item-row.prepared .item-name-cell {
+  text-decoration: line-through;
+  color: var(--admin-text-light);
+  opacity: 0.5;
+}
+
+.item-prep-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--admin-success);
+}
+
 .order-status-select {
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--admin-border);
