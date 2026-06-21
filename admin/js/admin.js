@@ -1297,20 +1297,19 @@
         showToast("Saving status to cloud...");
         fetch(sheetUrl, {
           method: 'POST',
+          mode: 'no-cors',
           body: JSON.stringify({
             action: "updateStatus",
             id: orderId,
             status: newStatus
           })
         })
-        .then(res => res.json())
-        .then(resData => {
-          if (resData.status === "success") {
-            showToast(`Order #${orderId} status updated to "${newStatus}"`);
+        .then(() => {
+          showToast(`Order #${orderId} status updated to "${newStatus}"`);
+          if (fetchOrdersFromSheet) fetchOrdersFromSheet();
+          setTimeout(() => {
             if (fetchOrdersFromSheet) fetchOrdersFromSheet();
-          } else {
-            throw new Error(resData.message || "Failed to update status");
-          }
+          }, 1500);
         })
         .catch(err => {
           console.error("Cloud status update error:", err);
@@ -1359,19 +1358,18 @@
         showToast("Deleting from cloud...");
         fetch(sheetUrl, {
           method: 'POST',
+          mode: 'no-cors',
           body: JSON.stringify({
             action: "delete",
             id: orderId
           })
         })
-        .then(res => res.json())
-        .then(resData => {
-          if (resData.status === "success") {
-            showToast(`Order #${orderId} deleted`);
+        .then(() => {
+          showToast(`Order #${orderId} deleted`);
+          if (fetchOrdersFromSheet) fetchOrdersFromSheet();
+          setTimeout(() => {
             if (fetchOrdersFromSheet) fetchOrdersFromSheet();
-          } else {
-            throw new Error(resData.message || "Failed to delete");
-          }
+          }, 1500);
         })
         .catch(err => {
           console.error("Cloud delete error:", err);

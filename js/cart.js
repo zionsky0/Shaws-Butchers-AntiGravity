@@ -634,22 +634,15 @@ const Cart = (() => {
       try {
         fetch(sheetUrl, {
           method: 'POST',
+          mode: 'no-cors',
           body: JSON.stringify({
             action: "create",
             order: order
           })
         })
-        .then(res => {
-          if (!res.ok) throw new Error("HTTP request failed");
-          return res.json();
-        })
-        .then(resData => {
-          if (resData.status === "success") {
-            saveLocal();
-            showSuccess();
-          } else {
-            throw new Error(resData.message || "Failed to write to sheet");
-          }
+        .then(() => {
+          saveLocal();
+          showSuccess();
         })
         .catch(err => {
           console.error("Google Sheet Sync Error (Promise):", err);
