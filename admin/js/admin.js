@@ -560,7 +560,6 @@
         <span>Product</span>
         <span>Category</span>
         <span>Price</span>
-        <span>Unit</span>
         <span>Status</span>
         <span>Actions</span>
       </div>
@@ -574,14 +573,18 @@
 
         return `
         <div class="product-row" data-id="${p.id}">
-          ${img
-            ? `<img src="${img}" alt="${p.name}" class="product-row-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-row-thumb-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
-            : `<div class="product-row-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
-          }
+          <div class="product-row-thumb-wrap">
+            ${img
+              ? `<img src="${img}" alt="${p.name}" class="product-row-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-row-thumb-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
+              : `<div class="product-row-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
+            }
+          </div>
           <div class="product-row-name">${p.name}${p.badge ? ` <small>🏷️ ${p.badge}</small>` : ''}${p.description ? `<small>${p.description}</small>` : ''}</div>
           <span class="product-row-cat">${CATEGORY_LABELS[p.category] || p.category}</span>
-          <span class="product-row-price">${p.price > 0 ? `£${p.price.toFixed(2)}` : 'Contact'}</span>
-          <span class="product-row-price"><small>${p.unit}</small></span>
+          <div class="product-row-price-wrap">
+            <span class="product-row-price">${p.price > 0 ? `£${p.price.toFixed(2)}` : 'Contact'}</span>
+            <span class="product-row-unit"><small>${p.unit}</small></span>
+          </div>
           <span class="status-badge ${statusClass}">${statusText}</span>
           <div class="product-row-actions">
             <button class="action-btn edit-product-btn" data-id="${p.id}" title="Edit">
