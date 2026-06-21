@@ -7,7 +7,7 @@
     SESSION: 'shaws_admin_session',
     PRODUCTS: 'shaws_admin_products',
     ORDERS: 'shaws_orders',
-    DARK_MODE: 'shaws_admin_dark',
+    DARK_MODE: 'shaws_admin_dark', 
   };
 
   const DEFAULT_PASSWORD = 'shaws2024';
