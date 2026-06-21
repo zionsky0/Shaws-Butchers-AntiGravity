@@ -489,8 +489,8 @@ const Cart = (() => {
       console.warn("Failed to save customer details on checkout", err);
     }
 
-    // Generate a user-friendly order ID in the format "beefXXXX" where XXXX is a random 4-digit number
-    const orderNum = Math.floor(1000 + Math.random() * 9000);
+    // Generate a user-friendly order ID in the format "beefXXXXXX" where XXXXXX is a random 6-digit number
+    const orderNum = Math.floor(100000 + Math.random() * 900000);
     const orderId = `beef${orderNum}`;
     const order = {
       id: orderId,
