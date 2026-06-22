@@ -135,7 +135,172 @@ const DemoMode = (() => {
       border: '#D3E0E6',
       heroBg1: '#051b1b',
       heroBg2: '#0a2d2d',
-    }
+    },
+    // ——— NEW SCHEMES ———
+    {
+      id: 'midnight',
+      name: 'Midnight Luxe',
+      primary: '#1E1B4B',
+      primaryDark: '#0F0D2E',
+      primaryLight: '#3730A3',
+      accent: '#F59E0B',
+      accentLight: '#FCD34D',
+      bg: '#0F172A',
+      bgAlt: '#1E293B',
+      text: '#E2E8F0',
+      textLight: '#94A3B8',
+      border: '#334155',
+      heroBg1: '#020617',
+      heroBg2: '#0F172A',
+      isDark: true,
+    },
+    {
+      id: 'neon-night',
+      name: 'Neon Night',
+      primary: '#7C3AED',
+      primaryDark: '#5B21B6',
+      primaryLight: '#A78BFA',
+      accent: '#06D6A0',
+      accentLight: '#34D399',
+      bg: '#0A0A0F',
+      bgAlt: '#141420',
+      text: '#E4E4F0',
+      textLight: '#9898B0',
+      border: '#2A2A3D',
+      heroBg1: '#050510',
+      heroBg2: '#0F0F2B',
+      isDark: true,
+    },
+    {
+      id: 'sunset',
+      name: 'Golden Sunset',
+      primary: '#DC2626',
+      primaryDark: '#991B1B',
+      primaryLight: '#EF4444',
+      accent: '#F97316',
+      accentLight: '#FB923C',
+      bg: '#FFFBEB',
+      bgAlt: '#FEF3C7',
+      text: '#451A03',
+      textLight: '#92400E',
+      border: '#FDE68A',
+      heroBg1: '#1C0505',
+      heroBg2: '#3B0D0D',
+    },
+    {
+      id: 'arctic',
+      name: 'Arctic Frost',
+      primary: '#0EA5E9',
+      primaryDark: '#0369A1',
+      primaryLight: '#38BDF8',
+      accent: '#F43F5E',
+      accentLight: '#FB7185',
+      bg: '#F0F9FF',
+      bgAlt: '#E0F2FE',
+      text: '#0C4A6E',
+      textLight: '#0284C7',
+      border: '#BAE6FD',
+      heroBg1: '#031525',
+      heroBg2: '#082F49',
+    },
+    {
+      id: 'rose-gold',
+      name: 'Rosé Gold',
+      primary: '#BE185D',
+      primaryDark: '#9D174D',
+      primaryLight: '#EC4899',
+      accent: '#D4A853',
+      accentLight: '#E8C97A',
+      bg: '#FFF1F2',
+      bgAlt: '#FFE4E6',
+      text: '#4C0519',
+      textLight: '#9F1239',
+      border: '#FECDD3',
+      heroBg1: '#1A0510',
+      heroBg2: '#350A1F',
+    },
+    {
+      id: 'forest',
+      name: 'Deep Forest',
+      primary: '#166534',
+      primaryDark: '#14532D',
+      primaryLight: '#22C55E',
+      accent: '#CA8A04',
+      accentLight: '#FACC15',
+      bg: '#052E16',
+      bgAlt: '#14532D',
+      text: '#DCFCE7',
+      textLight: '#86EFAC',
+      border: '#166534',
+      heroBg1: '#022C22',
+      heroBg2: '#052E16',
+      isDark: true,
+    },
+    {
+      id: 'ember',
+      name: 'Ember & Smoke',
+      primary: '#EA580C',
+      primaryDark: '#C2410C',
+      primaryLight: '#F97316',
+      accent: '#78350F',
+      accentLight: '#92400E',
+      bg: '#1C1917',
+      bgAlt: '#292524',
+      text: '#FED7AA',
+      textLight: '#FDBA74',
+      border: '#44403C',
+      heroBg1: '#0C0A09',
+      heroBg2: '#1C1917',
+      isDark: true,
+    },
+    {
+      id: 'lavender',
+      name: 'Lavender Dream',
+      primary: '#7E22CE',
+      primaryDark: '#6B21A8',
+      primaryLight: '#A855F7',
+      accent: '#EC4899',
+      accentLight: '#F472B6',
+      bg: '#FAF5FF',
+      bgAlt: '#F3E8FF',
+      text: '#3B0764',
+      textLight: '#6B21A8',
+      border: '#E9D5FF',
+      heroBg1: '#1E0338',
+      heroBg2: '#2E1065',
+    },
+    {
+      id: 'monochrome',
+      name: 'Monochrome',
+      primary: '#171717',
+      primaryDark: '#0A0A0A',
+      primaryLight: '#404040',
+      accent: '#D4D4D4',
+      accentLight: '#E5E5E5',
+      bg: '#FAFAFA',
+      bgAlt: '#F5F5F5',
+      text: '#171717',
+      textLight: '#737373',
+      border: '#D4D4D4',
+      heroBg1: '#0A0A0A',
+      heroBg2: '#171717',
+    },
+    {
+      id: 'copper',
+      name: 'Aged Copper',
+      primary: '#B45309',
+      primaryDark: '#92400E',
+      primaryLight: '#D97706',
+      accent: '#365314',
+      accentLight: '#4D7C0F',
+      bg: '#FFFBEB',
+      bgAlt: '#FEF3C7',
+      text: '#422006',
+      textLight: '#854D0E',
+      border: '#FDE68A',
+      heroBg1: '#1C1205',
+      heroBg2: '#362107',
+    },
   ];
 
   const FONT_PAIRS = [
@@ -184,12 +349,78 @@ const DemoMode = (() => {
       previewHeading: 'Outfit',
       previewBody: 'Outfit',
     },
+    // ——— NEW FONT PAIRS ———
+    {
+      id: 'clash-satoshi',
+      name: 'Clash + Satoshi',
+      heading: "'Sora', -apple-system, BlinkMacSystemFont, sans-serif",
+      body: "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
+      url: 'https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap',
+      previewHeading: 'Sora',
+      previewBody: 'Space Grotesk',
+    },
+    {
+      id: 'fraunces-cabinet',
+      name: 'Fraunces + Cabinet',
+      heading: "'Fraunces', Georgia, serif",
+      body: "'Cabinet Grotesk', 'Plus Jakarta Sans', -apple-system, sans-serif",
+      url: 'https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+      previewHeading: 'Fraunces',
+      previewBody: 'Plus Jakarta Sans',
+    },
+    {
+      id: 'crimson-manrope',
+      name: 'Crimson + Manrope',
+      heading: "'Crimson Pro', Georgia, serif",
+      body: "'Manrope', -apple-system, sans-serif",
+      url: 'https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap',
+      previewHeading: 'Crimson Pro',
+      previewBody: 'Manrope',
+    },
+    {
+      id: 'bebas-poppins',
+      name: 'Bebas + Poppins',
+      heading: "'Bebas Neue', Impact, sans-serif",
+      body: "'Poppins', -apple-system, sans-serif",
+      url: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap',
+      previewHeading: 'Bebas Neue',
+      previewBody: 'Poppins',
+    },
+    {
+      id: 'merriweather-nunito',
+      name: 'Merriweather + Nunito',
+      heading: "'Merriweather', Georgia, serif",
+      body: "'Nunito Sans', -apple-system, sans-serif",
+      url: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Nunito+Sans:wght@400;500;600;700&display=swap',
+      previewHeading: 'Merriweather',
+      previewBody: 'Nunito Sans',
+    },
   ];
 
   const LAYOUTS = [
-    { id: 'standard', name: 'Standard' },
-    { id: 'magazine', name: 'Magazine' },
-    { id: 'compact', name: 'Compact' },
+    { id: 'standard', name: 'Standard', icon: 'standard' },
+    { id: 'magazine', name: 'Magazine', icon: 'magazine' },
+    { id: 'compact', name: 'Compact', icon: 'compact' },
+    // ——— NEW LAYOUTS ———
+    { id: 'editorial', name: 'Editorial', icon: 'editorial' },
+    { id: 'cinematic', name: 'Cinematic', icon: 'cinematic' },
+    { id: 'brutalist', name: 'Brutalist', icon: 'brutalist' },
+    { id: 'elegant', name: 'Elegant', icon: 'elegant' },
+    { id: 'grid-heavy', name: 'Grid Heavy', icon: 'grid-heavy' },
+  ];
+
+  // ——— NEW: Design Styles ———
+  const DESIGN_STYLES = [
+    { id: 'none', name: 'Default', emoji: '✨' },
+    { id: 'glassmorphism', name: 'Glassmorphism', emoji: '🪟' },
+    { id: 'neon-glow', name: 'Neon Glow', emoji: '💡' },
+    { id: 'retro-grain', name: 'Retro Grain', emoji: '📺' },
+    { id: 'floating-cards', name: 'Float Cards', emoji: '🎈' },
+    { id: 'soft-shadows', name: 'Soft Shadows', emoji: '☁️' },
+    { id: 'morphism-3d', name: '3D Depth', emoji: '🧊' },
+    { id: 'gradient-mesh', name: 'Gradient Mesh', emoji: '🌈' },
+    { id: 'paper-cut', name: 'Paper Cut', emoji: '✂️' },
+    { id: 'aurora', name: 'Aurora', emoji: '🌌' },
   ];
 
   const STORAGE_KEY = 'shaws_demo_mode';
@@ -200,6 +431,7 @@ const DemoMode = (() => {
     colorScheme: 'classic',
     fontPair: 'playfair-inter',
     layout: 'standard',
+    designStyle: 'none',
     shopName: "Shaw's",
     shopNameFull: "Shaw's Family Butchers",
     phone: '01928 561869',
@@ -248,6 +480,7 @@ const DemoMode = (() => {
         '--color-bg', '--color-bg-alt', '--color-text', '--color-text-light', '--color-border',
         '--primary', '--accent', '--text-primary', '--text-secondary', '--bg-warm', '--border',
         '--color-hero-bg-1', '--color-hero-bg-2',
+        '--color-white', '--color-text-inv',
       ].forEach(prop => root.style.removeProperty(prop));
 
       // Restore dark mode if it was active
@@ -257,9 +490,17 @@ const DemoMode = (() => {
       } else {
         body.classList.remove('dark-mode');
       }
+      body.classList.remove('demo-dark-scheme');
     } else {
       // For custom schemes, remove dark-mode to ensure correct rendering of light-themed preset
       body.classList.remove('dark-mode');
+
+      // If scheme is inherently dark, add a helper class
+      if (scheme.isDark) {
+        body.classList.add('demo-dark-scheme');
+      } else {
+        body.classList.remove('demo-dark-scheme');
+      }
 
       // Set inline custom properties
       root.style.setProperty('--color-primary', scheme.primary);
@@ -274,6 +515,11 @@ const DemoMode = (() => {
       root.style.setProperty('--color-border', scheme.border);
       root.style.setProperty('--color-hero-bg-1', scheme.heroBg1);
       root.style.setProperty('--color-hero-bg-2', scheme.heroBg2);
+
+      if (scheme.isDark) {
+        root.style.setProperty('--color-white', scheme.bgAlt);
+        root.style.setProperty('--color-text-inv', '#f5f5f5');
+      }
 
       // Also update the alias variables
       root.style.setProperty('--primary', scheme.primary);
@@ -313,11 +559,35 @@ const DemoMode = (() => {
     state.layout = id;
 
     // Remove all layout classes
-    document.body.classList.remove('layout-magazine', 'layout-compact');
+    document.body.classList.remove(
+      'layout-magazine', 'layout-compact', 'layout-editorial',
+      'layout-cinematic', 'layout-brutalist', 'layout-elegant', 'layout-grid-heavy'
+    );
 
     // Add the new one (standard = no class)
     if (id !== 'standard') {
       document.body.classList.add(`layout-${id}`);
+    }
+
+    saveState();
+    updateActiveStates();
+  };
+
+  const applyDesignStyle = (id) => {
+    if (!DESIGN_STYLES.find(d => d.id === id)) return;
+
+    state.designStyle = id;
+
+    // Remove all design style classes
+    document.body.classList.remove(
+      'design-glassmorphism', 'design-neon-glow', 'design-retro-grain',
+      'design-floating-cards', 'design-soft-shadows', 'design-morphism-3d',
+      'design-gradient-mesh', 'design-paper-cut', 'design-aurora'
+    );
+
+    // Add the new one (none = no class)
+    if (id !== 'none') {
+      document.body.classList.add(`design-${id}`);
     }
 
     saveState();
@@ -396,20 +666,26 @@ const DemoMode = (() => {
 
         <!-- Colour Schemes -->
         <div class="demo-section">
-          <div class="demo-section-title">Colour Scheme</div>
+          <div class="demo-section-title">Colour Scheme <span class="demo-section-count">${COLOR_SCHEMES.length}</span></div>
           <div class="demo-swatches" id="demoSwatches"></div>
         </div>
 
-        <!-- Font Pairs -->
+        <!-- Design Styles -->
         <div class="demo-section">
-          <div class="demo-section-title">Font Pairing</div>
-          <div class="demo-fonts" id="demoFonts"></div>
+          <div class="demo-section-title">Design Style <span class="demo-section-count">${DESIGN_STYLES.length}</span></div>
+          <div class="demo-design-styles" id="demoDesignStyles"></div>
         </div>
 
         <!-- Layout -->
         <div class="demo-section">
-          <div class="demo-section-title">Layout Style</div>
+          <div class="demo-section-title">Layout Style <span class="demo-section-count">${LAYOUTS.length}</span></div>
           <div class="demo-layouts" id="demoLayouts"></div>
+        </div>
+
+        <!-- Font Pairs -->
+        <div class="demo-section">
+          <div class="demo-section-title">Font Pairing <span class="demo-section-count">${FONT_PAIRS.length}</span></div>
+          <div class="demo-fonts" id="demoFonts"></div>
         </div>
 
         <!-- Quick Edits -->
@@ -466,6 +742,20 @@ const DemoMode = (() => {
       `;
       btn.addEventListener('click', () => applyColorScheme(scheme.id));
       swatchContainer.appendChild(btn);
+    });
+
+    // Populate design styles
+    const designContainer = panel.querySelector('#demoDesignStyles');
+    DESIGN_STYLES.forEach(ds => {
+      const btn = document.createElement('button');
+      btn.className = 'demo-design-btn';
+      btn.dataset.design = ds.id;
+      btn.innerHTML = `
+        <span class="demo-design-emoji">${ds.emoji}</span>
+        <span class="demo-design-label">${ds.name}</span>
+      `;
+      btn.addEventListener('click', () => applyDesignStyle(ds.id));
+      designContainer.appendChild(btn);
     });
 
     // Populate fonts
@@ -610,6 +900,11 @@ const DemoMode = (() => {
     document.querySelectorAll('.demo-layout-btn').forEach(el => {
       el.classList.toggle('active', el.dataset.layout === state.layout);
     });
+
+    // Design styles
+    document.querySelectorAll('.demo-design-btn').forEach(el => {
+      el.classList.toggle('active', el.dataset.design === state.designStyle);
+    });
   };
 
   // ---------- Reset ----------
@@ -621,6 +916,7 @@ const DemoMode = (() => {
       colorScheme: 'classic',
       fontPair: 'playfair-inter',
       layout: 'standard',
+      designStyle: 'none',
       shopName: "Shaw's",
       shopNameFull: "Shaw's Family Butchers",
       phone: '01928 561869',
@@ -637,10 +933,18 @@ const DemoMode = (() => {
       '--primary', '--accent', '--text-primary', '--text-secondary', '--bg-warm', '--border',
       '--font-heading', '--font-body',
       '--color-hero-bg-1', '--color-hero-bg-2',
+      '--color-white', '--color-text-inv',
     ].forEach(prop => root.style.removeProperty(prop));
 
     document.body.style.fontFamily = '';
-    document.body.classList.remove('layout-magazine', 'layout-compact');
+    document.body.classList.remove(
+      'layout-magazine', 'layout-compact', 'layout-editorial',
+      'layout-cinematic', 'layout-brutalist', 'layout-elegant', 'layout-grid-heavy',
+      'design-glassmorphism', 'design-neon-glow', 'design-retro-grain',
+      'design-floating-cards', 'design-soft-shadows', 'design-morphism-3d',
+      'design-gradient-mesh', 'design-paper-cut', 'design-aurora',
+      'demo-dark-scheme'
+    );
 
     // Restore dark mode if active
     const saved = localStorage.getItem('shaws-dark-mode');
@@ -701,6 +1005,9 @@ const DemoMode = (() => {
     if (state.layout !== 'standard') {
       applyLayout(state.layout);
     }
+    if (state.designStyle !== 'none') {
+      applyDesignStyle(state.designStyle);
+    }
 
     // Listen to dark mode toggle to reset custom color scheme if enabled
     const darkToggle = document.getElementById('darkToggle');
@@ -719,7 +1026,10 @@ const DemoMode = (() => {
             '--color-bg', '--color-bg-alt', '--color-text', '--color-text-light', '--color-border',
             '--primary', '--accent', '--text-primary', '--text-secondary', '--bg-warm', '--border',
             '--color-hero-bg-1', '--color-hero-bg-2',
+            '--color-white', '--color-text-inv',
           ].forEach(prop => root.style.removeProperty(prop));
+
+          document.body.classList.remove('demo-dark-scheme');
           
           updateActiveStates();
         }
@@ -743,6 +1053,7 @@ const DemoMode = (() => {
     applyColorScheme,
     applyFontPair,
     applyLayout,
+    applyDesignStyle,
     resetAll,
     getState: () => ({ ...state }),
   };
