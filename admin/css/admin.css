@@ -616,7 +616,7 @@ table { border-collapse: collapse; width: 100%; }
 
 .products-table-header {
   display: grid;
-  grid-template-columns: 60px 2fr 1fr 140px 110px 120px;
+  grid-template-columns: 60px 2fr 1fr 80px 80px 100px 120px;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
   background: var(--admin-bg);
@@ -631,7 +631,7 @@ table { border-collapse: collapse; width: 100%; }
 
 .product-row {
   display: grid;
-  grid-template-columns: 60px 2fr 1fr 140px 110px 120px;
+  grid-template-columns: 60px 2fr 1fr 80px 80px 100px 120px;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
   align-items: center;
@@ -697,19 +697,13 @@ table { border-collapse: collapse; width: 100%; }
   text-transform: capitalize;
 }
 
-.product-row-price-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
 .product-row-price {
   font-weight: 600;
   color: var(--admin-primary);
   font-size: 0.92rem;
 }
 
-.product-row-unit {
+.product-row-price small {
   font-weight: 400;
   color: var(--admin-text-light);
   font-size: 0.75rem;
@@ -1314,11 +1308,13 @@ table { border-collapse: collapse; width: 100%; }
 
   .products-table-header,
   .product-row {
-    grid-template-columns: 48px 1fr 100px 95px 80px;
+    grid-template-columns: 48px 1fr 80px 80px;
   }
 
   .product-row > :nth-child(3),
-  .products-table-header > :nth-child(3) {
+  .products-table-header > :nth-child(3),
+  .product-row > :nth-child(5),
+  .products-table-header > :nth-child(5) {
     display: none;
   }
 
@@ -1356,48 +1352,14 @@ table { border-collapse: collapse; width: 100%; }
     align-items: stretch;
   }
 
-  .products-table-header {
-    display: none;
-  }
-
+  .products-table-header,
   .product-row {
-    display: grid;
-    grid-template-columns: 48px 1fr auto;
-    grid-template-rows: auto auto;
-    gap: 0.4rem 0.75rem;
-    padding: 0.85rem 1rem;
-    align-items: center;
+    grid-template-columns: 1fr 80px 80px;
   }
 
-  .product-row-thumb-wrap {
-    grid-row: 1 / span 2;
-    grid-column: 1;
-    display: block;
-  }
-
-  .product-row-name {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 0.95rem;
-  }
-
-  .product-row-price-wrap {
-    grid-column: 2;
-    grid-row: 2;
-    font-size: 0.85rem;
-    color: var(--admin-text-light);
-  }
-
-  .status-badge {
-    grid-column: 3;
-    grid-row: 1;
-    justify-self: end;
-  }
-
-  .product-row-actions {
-    grid-column: 3;
-    grid-row: 2;
-    justify-self: end;
+  .product-row > :first-child,
+  .products-table-header > :first-child {
+    display: none;
   }
 
   .settings-grid {
@@ -1550,6 +1512,23 @@ table { border-collapse: collapse; width: 100%; }
 
 [data-theme="dark"] .recent-order-row:hover {
   background: rgba(255,255,255,0.03);
+}
+
+[data-theme="dark"] .product-row-price,
+[data-theme="dark"] .order-total,
+[data-theme="dark"] .order-items-table .total-row td,
+[data-theme="dark"] .recent-order-amount,
+[data-theme="dark"] .modal-header h2 {
+  color: var(--admin-text);
+}
+
+[data-theme="dark"] .order-detail-card a {
+  color: var(--admin-accent);
+}
+
+[data-theme="dark"] .order-detail-card a:hover {
+  color: var(--admin-accent-light);
+  text-decoration: underline;
 }
 
 [data-theme="dark"] .modal {
