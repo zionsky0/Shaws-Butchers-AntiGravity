@@ -5,6 +5,6 @@ const DEFAULT_GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwvjda
 const DEFAULT_WHATSAPP_NUMBER = "07361808431";
 
 window.GLOBAL_CONFIG = {
-  googleSheetUrl: localStorage.getItem('shaws_google_sheet_url') || DEFAULT_GOOGLE_SHEET_URL || "https://script.google.com/macros/s/AKfycbwvjda-m8iuUPg_Y39LRpbuAOVDprZhL4pnqLf-sXQtsDVuDWe9geHb56oAisFV3c8pMg/exec",
+  googleSheetUrl: localStorage.getItem('shaws_google_sheet_url') || DEFAULT_GOOGLE_SHEET_URL || "",
   whatsappNumber: localStorage.getItem('shaws_whatsapp_number') || DEFAULT_WHATSAPP_NUMBER || ""
 };
