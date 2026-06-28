@@ -656,10 +656,12 @@ const Cart = (() => {
       }
     };
 
-    if (typeof grecaptcha !== 'undefined' && !isSpam) {
+    const siteKey = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.recaptchaSiteKey;
+    const hasRecaptcha = siteKey && siteKey !== "YOUR_RECAPTCHA_SITE_KEY_HERE" && siteKey !== "";
+
+    if (hasRecaptcha && typeof grecaptcha !== 'undefined' && !isSpam) {
       grecaptcha.ready(() => {
-        // Use placeholder or configured site key. Owner must replace with actual site key in production.
-        grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', { action: 'submit_order' })
+        grecaptcha.execute(siteKey, { action: 'submit_order' })
         .then(token => {
           submitOrder(token);
         })
@@ -719,6 +721,17 @@ const Cart = (() => {
         }
       });
     });
+
+    // Dynamically load Google reCAPTCHA v3 script if siteKey is configured
+    const siteKey = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.recaptchaSiteKey;
+    if (siteKey && siteKey !== "YOUR_RECAPTCHA_SITE_KEY_HERE" && siteKey !== "") {
+      if (!document.querySelector('script[src*="recaptcha/api.js"]')) {
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+        script.async = true;
+        document.head.appendChild(script);
+      }
+    }
   };
 
   return { init, addItem, removeItem, updateQty, incrementQty, decrementQty, clear, getItems, getCount, getTotal, openSidebar, closeSidebar };
