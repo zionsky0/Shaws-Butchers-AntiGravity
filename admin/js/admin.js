@@ -1714,6 +1714,9 @@
       const pass = $('#login-pass').value;
       const remember = $('#login-remember')?.checked;
       
+      const errEl = $('#login-error');
+      if (errEl) errEl.hidden = true;
+      
       const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
       if (sheetUrl && location.protocol !== 'file:') {
         showToast("Verifying credentials...");
@@ -1725,7 +1728,10 @@
         })
         .then(data => {
           if (data && data.status === "error") {
-            $('#login-error').hidden = false;
+            if (errEl) {
+              errEl.textContent = "Incorrect password. Please try again.";
+              errEl.hidden = false;
+            }
             $('#login-pass').value = '';
             $('#login-pass').focus();
           } else {
