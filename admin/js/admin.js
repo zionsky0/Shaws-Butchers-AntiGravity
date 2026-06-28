@@ -1712,57 +1712,33 @@
       const pass = $('#login-pass').value;
       const remember = $('#login-remember')?.checked;
       
-      if (window.firebaseEnabled && window.auth) {
-        const email = $('#login-email').value.trim();
-        const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
-        
-        window.auth.setPersistence(persistence)
-        .then(() => {
-          return window.auth.signInWithEmailAndPassword(email, pass);
+      const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
+      if (sheetUrl) {
+        showToast("Verifying credentials...");
+        const urlWithPass = sheetUrl + (sheetUrl.includes('?') ? '&' : '?') + "password=" + encodeURIComponent(pass);
+        fetch(urlWithPass)
+        .then(res => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.status === "error") {
+            $('#login-error').hidden = false;
+            $('#login-pass').value = '';
+            $('#login-pass').focus();
+          } else {
+            sessionStorage.setItem(KEYS.PASSWORD, pass);
+            if (remember) {
+              localStorage.setItem(KEYS.SESSION, 'true');
+              localStorage.setItem(KEYS.PASSWORD, pass);
+            } else {
+              sessionStorage.setItem(KEYS.SESSION, 'true');
+            }
+            showApp();
+          }
         })
         .catch(err => {
-          console.error("Firebase Login Error:", err);
-          $('#login-error').hidden = false;
-          $('#login-pass').value = '';
-          $('#login-pass').focus();
-        });
-      } else {
-        const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
-        if (sheetUrl) {
-          showToast("Verifying credentials...");
-          const urlWithPass = sheetUrl + (sheetUrl.includes('?') ? '&' : '?') + "password=" + encodeURIComponent(pass);
-          fetch(urlWithPass)
-          .then(res => {
-            if (!res.ok) throw new Error("Network response was not ok");
-            return res.json();
-          })
-          .then(data => {
-            if (data && data.status === "error") {
-              $('#login-error').hidden = false;
-              $('#login-pass').value = '';
-              $('#login-pass').focus();
-            } else {
-              sessionStorage.setItem(KEYS.PASSWORD, pass);
-              if (remember) {
-                localStorage.setItem(KEYS.SESSION, 'true');
-                localStorage.setItem(KEYS.PASSWORD, pass);
-              } else {
-                sessionStorage.setItem(KEYS.SESSION, 'true');
-              }
-              showApp();
-            }
-          })
-          .catch(err => {
-            console.error("Sheet Authentication Error:", err);
-            if (login(pass, remember)) {
-              showApp();
-            } else {
-              $('#login-error').hidden = false;
-              $('#login-pass').value = '';
-              $('#login-pass').focus();
-            }
-          });
-        } else {
+          console.error("Sheet Authentication Error:", err);
           if (login(pass, remember)) {
             showApp();
           } else {
@@ -1770,6 +1746,14 @@
             $('#login-pass').value = '';
             $('#login-pass').focus();
           }
+        });
+      } else {
+        if (login(pass, remember)) {
+          showApp();
+        } else {
+          $('#login-error').hidden = false;
+          $('#login-pass').value = '';
+          $('#login-pass').focus();
         }
       }
     });
