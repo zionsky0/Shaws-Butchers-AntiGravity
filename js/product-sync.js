@@ -181,22 +181,7 @@
       });
     };
 
-    if (window.firebaseEnabled && window.db) {
-      window.db.collection('products').get()
-      .then(snapshot => {
-        const products = [];
-        snapshot.forEach(doc => {
-          products.push({ id: doc.id, ...doc.data() });
-        });
-        runSync(products);
-      })
-      .catch(err => {
-        console.error("Error fetching products from Firestore:", err);
-        runSync(getAdminProducts());
-      });
-    } else {
-      runSync(getAdminProducts());
-    }
+    runSync(getAdminProducts());
   };
 
   document.addEventListener('DOMContentLoaded', syncProducts);

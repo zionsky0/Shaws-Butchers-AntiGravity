@@ -11,6 +11,7 @@
   };
 
   const DEFAULT_PASSWORD = 'shaws2024';
+  window.firebaseEnabled = false;
 
   let fetchOrdersFromSheet = null;
 
@@ -1329,13 +1330,15 @@
         });
       } else if (sheetUrl) {
         showToast("Saving status to cloud...");
+        const pass = sessionStorage.getItem(KEYS.PASSWORD) || localStorage.getItem(KEYS.PASSWORD) || '';
         fetch(sheetUrl, {
           method: 'POST',
           mode: 'no-cors',
           body: JSON.stringify({
             action: "updateStatus",
             id: orderId,
-            status: newStatus
+            status: newStatus,
+            password: pass
           })
         })
         .then(() => {
@@ -1390,12 +1393,14 @@
         });
       } else if (sheetUrl) {
         showToast("Deleting from cloud...");
+        const pass = sessionStorage.getItem(KEYS.PASSWORD) || localStorage.getItem(KEYS.PASSWORD) || '';
         fetch(sheetUrl, {
           method: 'POST',
           mode: 'no-cors',
           body: JSON.stringify({
             action: "delete",
-            id: orderId
+            id: orderId,
+            password: pass
           })
         })
         .then(() => {
@@ -1638,7 +1643,9 @@
       
       fetchOrdersFromSheet = () => {
         if (!checkAuth()) return;
-        fetch(sheetUrl)
+        const pass = sessionStorage.getItem(KEYS.PASSWORD) || localStorage.getItem(KEYS.PASSWORD) || '';
+        const urlWithPass = sheetUrl + (sheetUrl.includes('?') ? '&' : '?') + "password=" + encodeURIComponent(pass);
+        fetch(urlWithPass)
         .then(res => {
           if (!res.ok) throw new Error("Fetch failed");
           return res.json();
@@ -1720,12 +1727,49 @@
           $('#login-pass').focus();
         });
       } else {
-        if (login(pass, remember)) {
-          showApp();
+        const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
+        if (sheetUrl) {
+          showToast("Verifying credentials...");
+          const urlWithPass = sheetUrl + (sheetUrl.includes('?') ? '&' : '?') + "password=" + encodeURIComponent(pass);
+          fetch(urlWithPass)
+          .then(res => {
+            if (!res.ok) throw new Error("Network response was not ok");
+            return res.json();
+          })
+          .then(data => {
+            if (data && data.status === "error") {
+              $('#login-error').hidden = false;
+              $('#login-pass').value = '';
+              $('#login-pass').focus();
+            } else {
+              sessionStorage.setItem(KEYS.PASSWORD, pass);
+              if (remember) {
+                localStorage.setItem(KEYS.SESSION, 'true');
+                localStorage.setItem(KEYS.PASSWORD, pass);
+              } else {
+                sessionStorage.setItem(KEYS.SESSION, 'true');
+              }
+              showApp();
+            }
+          })
+          .catch(err => {
+            console.error("Sheet Authentication Error:", err);
+            if (login(pass, remember)) {
+              showApp();
+            } else {
+              $('#login-error').hidden = false;
+              $('#login-pass').value = '';
+              $('#login-pass').focus();
+            }
+          });
         } else {
-          $('#login-error').hidden = false;
-          $('#login-pass').value = '';
-          $('#login-pass').focus();
+          if (login(pass, remember)) {
+            showApp();
+          } else {
+            $('#login-error').hidden = false;
+            $('#login-pass').value = '';
+            $('#login-pass').focus();
+          }
         }
       }
     });

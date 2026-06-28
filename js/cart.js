@@ -624,56 +624,52 @@ const Cart = (() => {
     
     const isSpam = !!data.website_verification_code;
 
-    // Try Firestore first if enabled
-    if (window.firebaseEnabled && window.db && !isSpam) {
-      window.db.collection('orders').doc(orderId).set(order)
-      .then(() => {
-        // Concurrently update Google Sheets in the background if configured
-        if (sheetUrl && isValidUrl(sheetUrl)) {
+    const submitOrder = (recaptchaToken) => {
+      if (sheetUrl && isValidUrl(sheetUrl) && !isSpam) {
+        try {
           fetch(sheetUrl, {
             method: 'POST',
+            mode: 'no-cors',
             body: JSON.stringify({
               action: "create",
-              order: order
+              order: order,
+              recaptchaToken: recaptchaToken || ""
             })
-          }).catch(err => console.error("Background Google Sheet Sync Error:", err));
-        }
-        saveLocal();
-        showSuccess();
-      })
-      .catch(err => {
-        console.error("Firestore Order Submission Error:", err);
-        fallbackToLocal();
-      });
-    } else if (sheetUrl && isValidUrl(sheetUrl) && !isSpam) {
-      // Send to Google Sheets Apps Script endpoint (legacy fallback)
-      try {
-        fetch(sheetUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({
-            action: "create",
-            order: order
           })
-        })
-        .then(() => {
+          .then(() => {
+            saveLocal();
+            showSuccess();
+          })
+          .catch(err => {
+            console.error("Google Sheet Sync Error (Promise):", err);
+            fallbackToLocal();
+          });
+        } catch (err) {
+          console.error("Google Sheet Sync Error (Synchronous):", err);
+          fallbackToLocal();
+        }
+      } else {
+        if (!isSpam) {
           saveLocal();
-          showSuccess();
+        }
+        setTimeout(showSuccess, 800);
+      }
+    };
+
+    if (typeof grecaptcha !== 'undefined' && !isSpam) {
+      grecaptcha.ready(() => {
+        // Use placeholder or configured site key. Owner must replace with actual site key in production.
+        grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', { action: 'submit_order' })
+        .then(token => {
+          submitOrder(token);
         })
         .catch(err => {
-          console.error("Google Sheet Sync Error (Promise):", err);
-          fallbackToLocal();
+          console.warn("reCAPTCHA execution error:", err);
+          submitOrder("");
         });
-      } catch (err) {
-        console.error("Google Sheet Sync Error (Synchronous):", err);
-        fallbackToLocal();
-      }
+      });
     } else {
-      // Demo fallback mode (no database config)
-      if (!isSpam) {
-        saveLocal();
-      }
-      setTimeout(showSuccess, 800);
+      submitOrder("");
     }
   };
 
