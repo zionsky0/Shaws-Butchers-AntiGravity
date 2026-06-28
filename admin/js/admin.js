@@ -1715,7 +1715,7 @@
       const remember = $('#login-remember')?.checked;
       
       const sheetUrl = window.GLOBAL_CONFIG && window.GLOBAL_CONFIG.googleSheetUrl;
-      if (sheetUrl) {
+      if (sheetUrl && location.protocol !== 'file:') {
         showToast("Verifying credentials...");
         const urlWithPass = sheetUrl + (sheetUrl.includes('?') ? '&' : '?') + "password=" + encodeURIComponent(pass);
         fetch(urlWithPass)
