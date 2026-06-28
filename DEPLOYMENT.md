@@ -58,20 +58,22 @@ function doPost(e) {
     const COL_STATUS = 13;       // Column M
     
     if (action === "create") {
-      // 1. Verify storefront order submission with Google reCAPTCHA
+      // 1. Verify storefront order submission with Google reCAPTCHA (only if secret key is configured)
       const token = data.recaptchaToken;
-      const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
-      const response = UrlFetchApp.fetch(verificationUrl, {
-        method: "post",
-        payload: {
-          secret: RECAPTCHA_SECRET,
-          response: token
+      if (RECAPTCHA_SECRET && RECAPTCHA_SECRET !== "YOUR_RECAPTCHA_SECRET_KEY_HERE" && RECAPTCHA_SECRET !== "") {
+        const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
+        const response = UrlFetchApp.fetch(verificationUrl, {
+          method: "post",
+          payload: {
+            secret: RECAPTCHA_SECRET,
+            response: token
+          }
+        });
+        const verification = JSON.parse(response.getContentText());
+        if (!verification.success || verification.score < 0.5) {
+          return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Bot verification failed" }))
+                               .setMimeType(ContentService.MimeType.JSON);
         }
-      });
-      const verification = JSON.parse(response.getContentText());
-      if (!verification.success || verification.score < 0.5) {
-        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Bot verification failed" }))
-                             .setMimeType(ContentService.MimeType.JSON);
       }
 
       const order = data.order;
