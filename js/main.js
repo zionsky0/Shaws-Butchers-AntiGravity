@@ -122,6 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(contactForm);
     const data = Object.fromEntries(formData);
     
+    // Honeypot spam check
+    if (data.website_verification_code) {
+      console.warn("Contact form spam detected.");
+      contactForm.reset();
+      return;
+    }
+    
     // Show success message
     const btn = contactForm.querySelector('.form-submit');
     const originalText = btn.textContent;

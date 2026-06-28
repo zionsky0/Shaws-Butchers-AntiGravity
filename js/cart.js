@@ -24,6 +24,16 @@ const Cart = (() => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   };
 
+  const escapeHTML = (str) => {
+    if (typeof str !== 'string') return str || '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
   // ---------- Cart Operations ----------
   const getItems = () => [...items];
 
@@ -194,19 +204,19 @@ const Cart = (() => {
     }
 
     body.innerHTML = items.map(item => `
-      <div class="cart-sidebar-item" data-id="${item.id}">
+      <div class="cart-sidebar-item" data-id="${escapeHTML(item.id)}">
         <div class="cart-sidebar-item-info">
-          <h4>${item.name}</h4>
-          <span class="cart-sidebar-item-price">£${item.price.toFixed(2)} <small>${item.unit}</small></span>
+          <h4>${escapeHTML(item.name)}</h4>
+          <span class="cart-sidebar-item-price">£${item.price.toFixed(2)} <small>${escapeHTML(item.unit)}</small></span>
         </div>
         <div class="cart-sidebar-item-controls">
           <div class="qty-controls">
-            <button class="qty-btn qty-dec" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+            <button class="qty-btn qty-dec" data-id="${escapeHTML(item.id)}" aria-label="Decrease quantity">−</button>
             <span class="qty-value">${item.qty}</span>
-            <button class="qty-btn qty-inc" data-id="${item.id}" aria-label="Increase quantity">+</button>
+            <button class="qty-btn qty-inc" data-id="${escapeHTML(item.id)}" aria-label="Increase quantity">+</button>
           </div>
           <span class="cart-sidebar-item-subtotal">£${(item.price * item.qty).toFixed(2)}</span>
-          <button class="cart-sidebar-item-remove" data-id="${item.id}" aria-label="Remove item">
+          <button class="cart-sidebar-item-remove" data-id="${escapeHTML(item.id)}" aria-label="Remove item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -276,20 +286,20 @@ const Cart = (() => {
             <span></span>
           </div>
           ${items.map(item => `
-            <div class="basket-item" data-id="${item.id}">
+            <div class="basket-item" data-id="${escapeHTML(item.id)}">
               <div class="basket-item-name">
-                <h4>${item.name}</h4>
+                <h4>${escapeHTML(item.name)}</h4>
               </div>
-              <div class="basket-item-price">£${item.price.toFixed(2)} <small>${item.unit}</small></div>
+              <div class="basket-item-price">£${item.price.toFixed(2)} <small>${escapeHTML(item.unit)}</small></div>
               <div class="basket-item-qty">
                 <div class="qty-controls">
-                  <button class="qty-btn qty-dec" data-id="${item.id}">−</button>
+                  <button class="qty-btn qty-dec" data-id="${escapeHTML(item.id)}">−</button>
                   <span class="qty-value">${item.qty}</span>
-                  <button class="qty-btn qty-inc" data-id="${item.id}">+</button>
+                  <button class="qty-btn qty-inc" data-id="${escapeHTML(item.id)}">+</button>
                 </div>
               </div>
               <div class="basket-item-subtotal">£${(item.price * item.qty).toFixed(2)}</div>
-              <button class="basket-item-remove" data-id="${item.id}" aria-label="Remove">
+              <button class="basket-item-remove" data-id="${escapeHTML(item.id)}" aria-label="Remove">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               </button>
             </div>
@@ -349,6 +359,10 @@ const Cart = (() => {
             <div class="form-group">
               <label>Special Instructions</label>
               <textarea class="form-input" name="notes" rows="3" placeholder="E.g. cut thickness, specific weights, etc."></textarea>
+            </div>
+            <!-- Honeypot anti-spam field -->
+            <div style="display:none; position:absolute; left:-9999px;" aria-hidden="true">
+              <input type="text" name="website_verification_code" tabindex="-1" autocomplete="off">
             </div>
             <button type="submit" class="btn btn--primary form-submit">Place Order</button>
           </form>
@@ -554,12 +568,12 @@ const Cart = (() => {
             </svg>
           </div>
           <h2 style="color: #065f46; margin-bottom: 0.5rem; font-size: 1.5rem;">Order Submitted!</h2>
-          <p>Thank you, <strong>${data.name}</strong>! Your order has been successfully placed.</p>
+          <p>Thank you, <strong>${escapeHTML(data.name)}</strong>! Your order has been successfully placed.</p>
           
           <div class="basket-success-details" style="margin: 1.5rem 0; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1.25rem;">
             <h4 style="margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; color: #111827; font-weight: 600;">Order Summary</h4>
-            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Order ID:</strong> #${order.id}</p>
-            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Collection Date:</strong> ${formatCollectionDate(data.date)} at ${data.time}</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Order ID:</strong> #${escapeHTML(order.id)}</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.92rem;"><strong>Collection Date:</strong> ${escapeHTML(formatCollectionDate(data.date))} at ${escapeHTML(data.time)}</p>
             <p style="margin-bottom: 0; font-size: 0.92rem;"><strong>Estimated Total:</strong> £${order.total.toFixed(2)}</p>
           </div>
           
@@ -607,9 +621,11 @@ const Cart = (() => {
         return false;
       }
     };
+    
+    const isSpam = !!data.website_verification_code;
 
     // Try Firestore first if enabled
-    if (window.firebaseEnabled && window.db) {
+    if (window.firebaseEnabled && window.db && !isSpam) {
       window.db.collection('orders').doc(orderId).set(order)
       .then(() => {
         // Concurrently update Google Sheets in the background if configured
@@ -629,7 +645,7 @@ const Cart = (() => {
         console.error("Firestore Order Submission Error:", err);
         fallbackToLocal();
       });
-    } else if (sheetUrl && isValidUrl(sheetUrl)) {
+    } else if (sheetUrl && isValidUrl(sheetUrl) && !isSpam) {
       // Send to Google Sheets Apps Script endpoint (legacy fallback)
       try {
         fetch(sheetUrl, {
@@ -654,7 +670,9 @@ const Cart = (() => {
       }
     } else {
       // Demo fallback mode (no database config)
-      saveLocal();
+      if (!isSpam) {
+        saveLocal();
+      }
       setTimeout(showSuccess, 800);
     }
   };

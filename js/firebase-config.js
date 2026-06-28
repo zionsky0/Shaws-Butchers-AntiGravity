@@ -21,6 +21,21 @@ if (typeof firebase !== 'undefined') {
       firebase.initializeApp(FIREBASE_CONFIG);
       db = firebase.firestore();
       auth = firebase.auth();
+      
+      // Initialize App Check if script is loaded
+      if (typeof firebase.appCheck === 'function') {
+        try {
+          const appCheck = firebase.appCheck();
+          appCheck.activate(
+            new firebase.appCheck.ReCaptchaV3Provider('YOUR_RECAPTCHA_KEY'),
+            true // isTokenAutoRefreshEnabled
+          );
+          console.log("Firebase App Check initialized.");
+        } catch (appCheckErr) {
+          console.warn("App Check failed to activate:", appCheckErr);
+        }
+      }
+
       firebaseEnabled = true;
       console.log("Firebase initialized successfully.");
     } else {

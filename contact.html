@@ -158,6 +158,10 @@
               <label>Message <span class="required">*</span></label>
               <textarea class="form-input" name="message" required placeholder="How can we help you?"></textarea>
             </div>
+            <!-- Honeypot anti-spam field -->
+            <div style="display:none; position:absolute; left:-9999px;" aria-hidden="true">
+              <input type="text" name="website_verification_code" tabindex="-1" autocomplete="off">
+            </div>
             <button type="submit" class="btn btn--primary form-submit">Send Message</button>
           </form>
         </div>

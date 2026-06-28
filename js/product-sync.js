@@ -6,6 +6,16 @@
 (() => {
   const PRODUCTS_KEY = 'shaws_admin_products';
 
+  const escapeHTML = (str) => {
+    if (typeof str !== 'string') return str || '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
   // Detect which category page we're on
   const detectCategory = () => {
     const path = window.location.pathname.toLowerCase();
@@ -69,7 +79,7 @@
         // Update price
         const priceEl = card.querySelector('.product-price');
         if (priceEl && adminProduct.price > 0) {
-          priceEl.innerHTML = `£${adminProduct.price.toFixed(2)} <small>${adminProduct.unit}</small>`;
+          priceEl.innerHTML = `£${adminProduct.price.toFixed(2)} <small>${escapeHTML(adminProduct.unit)}</small>`;
         } else if (priceEl && adminProduct.price === 0) {
           priceEl.innerHTML = `Contact for price`;
         }
@@ -134,14 +144,14 @@
 
         card.innerHTML = `
           <div class="product-image">
-            ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-            <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.style.opacity='0.3'">
+            ${p.badge ? `<div class="product-badge">${escapeHTML(p.badge)}</div>` : ''}
+            <img src="${imgSrc}" alt="${escapeHTML(p.name)}" loading="lazy" onerror="this.style.opacity='0.3'">
           </div>
           <div class="product-info">
-            <h3 class="product-name">${p.name}</h3>
-            <p class="product-desc">${p.description || ''}</p>
+            <h3 class="product-name">${escapeHTML(p.name)}</h3>
+            <p class="product-desc">${escapeHTML(p.description || '')}</p>
             <div class="product-footer">
-              <span class="product-price">£${p.price.toFixed(2)} <small>${p.unit}</small></span>
+              <span class="product-price">£${p.price.toFixed(2)} <small>${escapeHTML(p.unit)}</small></span>
               <button class="btn btn--outline btn--sm btn-add-cart">Add to Basket</button>
             </div>
           </div>

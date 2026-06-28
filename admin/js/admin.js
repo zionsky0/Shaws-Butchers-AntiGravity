@@ -373,6 +373,16 @@
     }, 3000);
   };
 
+  const escapeHTML = (str) => {
+    if (typeof str !== 'string') return str || '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
   // ==================== AUTH ====================
   const checkAuth = () => {
     if (window.firebaseEnabled && window.auth) {
@@ -492,12 +502,12 @@
     } else {
       const recent = orders.slice(-5).reverse();
       recentContainer.innerHTML = recent.map(order => `
-        <div class="recent-order-row" data-order-id="${order.id}">
+        <div class="recent-order-row" data-order-id="${escapeHTML(order.id)}">
           <div class="recent-order-info">
-            <span class="recent-order-name">${order.customer?.name || 'Unknown'}</span>
+            <span class="recent-order-name">${escapeHTML(order.customer?.name || 'Unknown')}</span>
             <span class="recent-order-date">${formatDateTime(order.date)}</span>
           </div>
-          <span class="order-status order-status--${order.status}">${order.status}</span>
+          <span class="order-status order-status--${escapeHTML(order.status)}">${escapeHTML(order.status)}</span>
           <span class="recent-order-amount">£${(order.total || 0).toFixed(2)}</span>
         </div>
       `).join('');
@@ -572,25 +582,25 @@
         const img = imgPath(p.image);
 
         return `
-        <div class="product-row" data-id="${p.id}">
+        <div class="product-row" data-id="${escapeHTML(p.id)}">
           <div class="product-row-thumb-wrap">
             ${img
-              ? `<img src="${img}" alt="${p.name}" class="product-row-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-row-thumb-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
+              ? `<img src="${img}" alt="${escapeHTML(p.name)}" class="product-row-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-row-thumb-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
               : `<div class="product-row-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
             }
           </div>
-          <div class="product-row-name">${p.name}${p.badge ? ` <small>🏷️ ${p.badge}</small>` : ''}${p.description ? `<small>${p.description}</small>` : ''}</div>
-          <span class="product-row-cat">${CATEGORY_LABELS[p.category] || p.category}</span>
+          <div class="product-row-name">${escapeHTML(p.name)}${p.badge ? ` <small>🏷️ ${escapeHTML(p.badge)}</small>` : ''}${p.description ? `<small>${escapeHTML(p.description)}</small>` : ''}</div>
+          <span class="product-row-cat">${escapeHTML(CATEGORY_LABELS[p.category] || p.category)}</span>
           <div class="product-row-price-wrap">
             <span class="product-row-price">${p.price > 0 ? `£${p.price.toFixed(2)}` : 'Contact'}</span>
-            <span class="product-row-unit"><small>${p.unit}</small></span>
+            <span class="product-row-unit"><small>${escapeHTML(p.unit)}</small></span>
           </div>
           <span class="status-badge ${statusClass}">${statusText}</span>
           <div class="product-row-actions">
-            <button class="action-btn edit-product-btn" data-id="${p.id}" title="Edit">
+            <button class="action-btn edit-product-btn" data-id="${escapeHTML(p.id)}" title="Edit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="action-btn action-btn--danger delete-product-btn" data-id="${p.id}" title="Delete">
+            <button class="action-btn action-btn--danger delete-product-btn" data-id="${escapeHTML(p.id)}" title="Delete">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
@@ -1125,18 +1135,18 @@
     }
 
     container.innerHTML = filtered.map(order => `
-      <div class="order-card" data-order-id="${order.id}">
-        <span class="order-id">#${order.id}</span>
+      <div class="order-card" data-order-id="${escapeHTML(order.id)}">
+        <span class="order-id">#${escapeHTML(order.id)}</span>
         <div class="order-info">
-          <span class="order-customer">${order.customer?.name || 'Unknown'}</span>
+          <span class="order-customer">${escapeHTML(order.customer?.name || 'Unknown')}</span>
           <div class="order-meta">
             <span>📅 Collect: ${formatDate(order.customer?.collectionDate || order.date)}${order.customer?.collectionTime ? ` @ ${formatTime(order.customer.collectionTime)}` : ''}</span>
-            <span>📞 ${order.customer?.phone || 'N/A'}</span>
+            <span>📞 ${escapeHTML(order.customer?.phone || 'N/A')}</span>
             <span>${order.items?.length || 0} items</span>
           </div>
         </div>
         <span class="order-total">£${(order.total || 0).toFixed(2)}</span>
-        <span class="order-status order-status--${order.status}">${order.status}</span>
+        <span class="order-status order-status--${escapeHTML(order.status)}">${escapeHTML(order.status)}</span>
       </div>
     `).join('');
 
@@ -1163,10 +1173,10 @@
         <div class="order-detail-card">
           <h4>Customer</h4>
           <p>
-            <strong>${order.customer?.name || 'Unknown'}</strong><br>
-            📞 <a href="tel:${order.customer?.phone}">${order.customer?.phone || 'N/A'}</a><br>
-            ${order.customer?.email ? `✉️ <a href="mailto:${order.customer.email}">${order.customer.email}</a><br>` : ''}
-            ${order.customer?.address ? `📍 ${order.customer.address}${order.customer.postcode ? `, ${order.customer.postcode}` : ''}` : ''}
+            <strong>${escapeHTML(order.customer?.name || 'Unknown')}</strong><br>
+            📞 <a href="tel:${escapeHTML(order.customer?.phone || '')}">${escapeHTML(order.customer?.phone || 'N/A')}</a><br>
+            ${order.customer?.email ? `✉️ <a href="mailto:${escapeHTML(order.customer.email)}">${escapeHTML(order.customer.email)}</a><br>` : ''}
+            ${order.customer?.address ? `📍 ${escapeHTML(order.customer.address)}${order.customer.postcode ? `, ${escapeHTML(order.customer.postcode)}` : ''}` : ''}
           </p>
         </div>
         <div class="order-detail-card">
@@ -1174,7 +1184,7 @@
           <p>
             <strong>Ordered:</strong> ${formatDateTime(order.date)}<br>
             <strong>Collection:</strong> ${formatDate(order.customer?.collectionDate || '')}${order.customer?.collectionTime ? ` at ${formatTime(order.customer.collectionTime)}` : ''}<br>
-            ${order.customer?.notes ? `<strong>Notes:</strong> ${order.customer.notes}` : ''}
+            ${order.customer?.notes ? `<strong>Notes:</strong> ${escapeHTML(order.customer.notes)}` : ''}
           </p>
         </div>
       </div>
@@ -1195,8 +1205,8 @@
               <td style="text-align: center;" class="prep-checkbox-cell">
                 <input type="checkbox" class="item-prep-checkbox" id="prep-chk-${idx}">
               </td>
-              <td class="item-name-cell">${item.name}</td>
-              <td>£${(item.price || 0).toFixed(2)} ${item.unit || ''}</td>
+              <td class="item-name-cell">${escapeHTML(item.name)}</td>
+              <td>£${(item.price || 0).toFixed(2)} ${escapeHTML(item.unit || '')}</td>
               <td>${item.qty}</td>
               <td style="text-align:right">£${((item.price || 0) * item.qty).toFixed(2)}</td>
             </tr>
