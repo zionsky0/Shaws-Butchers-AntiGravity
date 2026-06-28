@@ -27,14 +27,14 @@ Instead of storing password hashes in client repository files, we require the pa
 
 ## Step 2: Google Sheets Apps Script Security Template
 
-Replace the script in your Google Sheets Apps Script Editor (**Extensions > Apps Script**) with this boilerplate code. Make sure to define a strong `ADMIN_PASSWORD` and register a `RECAPTCHA_SECRET` key from the Google reCAPTCHA admin panel:
+Replace the script in your Google Sheets Apps Script Editor (**Extensions > Apps Script**) with this boilerplate code. Set a strong `ADMIN_PASSWORD`:
 
 ```javascript
 // Google Apps Script for Shaw's Butchers
 // Deployed as a Web App to handle order creations, status updates, and deletions securely.
+// Spam protection uses built-in rate limiting, honeypot detection, and duplicate checks.
 
 var ADMIN_PASSWORD = "YOUR_SECURE_ADMIN_PASSWORD_HERE"; // Set your strong admin password here
-var RECAPTCHA_SECRET = "YOUR_RECAPTCHA_SECRET_KEY_HERE"; // For storefront bot protection
 
 function doPost(e) {
   try {
@@ -58,23 +58,44 @@ function doPost(e) {
     const COL_STATUS = 13;       // Column M
     
     if (action === "create") {
-      // 1. Verify storefront order submission with Google reCAPTCHA (only if secret key is configured)
-      const token = data.recaptchaToken;
-      if (RECAPTCHA_SECRET && RECAPTCHA_SECRET !== "YOUR_RECAPTCHA_SECRET_KEY_HERE" && RECAPTCHA_SECRET !== "") {
-        const verificationUrl = "https://www.google.com/recaptcha/api/siteverify";
-        const response = UrlFetchApp.fetch(verificationUrl, {
-          method: "post",
-          payload: {
-            secret: RECAPTCHA_SECRET,
-            response: token
-          }
-        });
-        const verification = JSON.parse(response.getContentText());
-        if (!verification.success || verification.score < 0.5) {
-          return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Bot verification failed" }))
-                               .setMimeType(ContentService.MimeType.JSON);
-        }
+      // --- SPAM PROTECTION (no external API calls needed) ---
+      
+      // 1. Honeypot check: if the hidden field has a value, it's a bot
+      if (data.honeypot) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "Order logged" }))
+          .setMimeType(ContentService.MimeType.JSON); // Silent reject — bots think it worked
       }
+      
+      // 2. Rate limiting: max 10 orders per minute using PropertiesService
+      var props = PropertiesService.getScriptProperties();
+      var now = Math.floor(Date.now() / 1000); // Current time in seconds
+      var windowKey = "rate_" + Math.floor(now / 60); // 1-minute window key
+      var count = parseInt(props.getProperty(windowKey) || "0", 10);
+      if (count >= 10) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Too many orders. Please try again shortly." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      props.setProperty(windowKey, (count + 1).toString());
+      // Clean up old keys (keep last 3 minutes only)
+      var oldKey1 = "rate_" + (Math.floor(now / 60) - 3);
+      var oldKey2 = "rate_" + (Math.floor(now / 60) - 4);
+      props.deleteProperty(oldKey1);
+      props.deleteProperty(oldKey2);
+      
+      // 3. Duplicate order ID check
+      var lastOrders = props.getProperty("recent_order_ids") || "";
+      var orderId = data.order && data.order.id ? data.order.id.toString() : "";
+      if (orderId && lastOrders.indexOf(orderId) !== -1) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Duplicate order detected" }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      // Store last 20 order IDs
+      var idList = lastOrders ? lastOrders.split(",") : [];
+      idList.push(orderId);
+      if (idList.length > 20) idList = idList.slice(-20);
+      props.setProperty("recent_order_ids", idList.join(","));
+      
+      // --- END SPAM PROTECTION ---
 
       const order = data.order;
       const customer = order.customer || {};

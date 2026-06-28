@@ -632,6 +632,7 @@ const Cart = (() => {
             body: JSON.stringify({
               action: "create",
               order: order,
+              honeypot: data.website_verification_code || "",
               recaptchaToken: recaptchaToken || ""
             })
           })

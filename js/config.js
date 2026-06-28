@@ -1,7 +1,7 @@
 // ===== GLOBAL CONFIGURATION =====
 // Stores the Google Sheets Web App URL and WhatsApp number for synchronized ordering.
 // Hardcode your values here to share them globally with all customers and devices.
-const DEFAULT_GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwbfkfKcRJKIVmFwEPK9jdQkTRWFfd_Jsbs_lqRbIr6VtynodEu8GZR9xGifBsoRwdhkw/exec";
+const DEFAULT_GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwqODdJiDzoCMSeinuWsDh7DGgRal0Ngnz82AHxhbNHEMxEi1F671nQigRE5UR0NRe8MA/exec";
 const DEFAULT_WHATSAPP_NUMBER = "07361808431";
 const DEFAULT_RECAPTCHA_SITE_KEY = "6LeCpjotAAAAAGUKeMrrGxMQhKQmw0F7rqGTUU4n";
 
