@@ -414,6 +414,8 @@
     } else {
       sessionStorage.removeItem(KEYS.SESSION);
       localStorage.removeItem(KEYS.SESSION);
+      sessionStorage.removeItem(KEYS.PASSWORD);
+      localStorage.removeItem(KEYS.PASSWORD);
       showLogin();
     }
   };
@@ -1742,7 +1744,11 @@
           if (login(pass, remember)) {
             showApp();
           } else {
-            $('#login-error').hidden = false;
+            const errEl = $('#login-error');
+            if (errEl) {
+              errEl.textContent = "Authentication or Connection error. Make sure your Google Sheet Apps Script is updated and online.";
+              errEl.hidden = false;
+            }
             $('#login-pass').value = '';
             $('#login-pass').focus();
           }
