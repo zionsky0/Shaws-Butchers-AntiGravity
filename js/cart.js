@@ -629,14 +629,20 @@ const Cart = (() => {
         try {
           fetch(sheetUrl, {
             method: 'POST',
-            mode: 'no-cors',
             body: JSON.stringify({
               action: "create",
               order: order,
               recaptchaToken: recaptchaToken || ""
             })
           })
-          .then(() => {
+          .then(res => {
+            if (!res.ok) throw new Error("Google Sheet returned non-OK status");
+            return res.json().catch(() => ({}));
+          })
+          .then(data => {
+            if (data && data.status === "error") {
+              throw new Error(data.message || "Failed to save order");
+            }
             saveLocal();
             showSuccess();
           })
